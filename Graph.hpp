@@ -1,16 +1,30 @@
 #include <vector>
+#include "Guard.hpp"
+#include <iostream>
 
 using namespace std;
 
-class Graph{
+class Graph: public Guard{
     
-    vector<vector<int>> graph;
+    vector<vector<int>> _graph;
+    int _edgeCounter;
 
 public:
-    Graph();
+    Graph() = default;
+    ~Graph() =default;
 
-    void init_graph(){
+    void NewGraph(int n);
 
+    void addEdge(int v, int u, int w);
+
+    void removeEdge(int v, int u);
+
+    int vertexNum();
+
+    int edgeNum();
+
+    const vector<vector<int>>& getGraph() const{
+        return _graph;
     }
 
 };
