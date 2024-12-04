@@ -3,7 +3,7 @@
 #include <iostream>
 
 using namespace std;
-
+//
 class Graph: public Guard{
     
     vector<vector<int>> _graph;
@@ -11,7 +11,7 @@ class Graph: public Guard{
 
 public:
     Graph() = default;
-    ~Graph() =default;
+    ~Graph() = default;
 
     void NewGraph(int n);
 
