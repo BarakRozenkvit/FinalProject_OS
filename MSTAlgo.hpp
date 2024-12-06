@@ -21,3 +21,7 @@ namespace MSTAlgo{
 
     };
 }
+
+namespace Util{
+
+}

@@ -6,7 +6,7 @@
 #include "MSTAlgo.hpp"
 #include <iostream>
 
-using namespace std
+using namespace std;
 
 namespace ClientHandler{
 

@@ -5,8 +5,21 @@
 #ifndef FINALPROJECT_OS_TREE_HPP
 #define FINALPROJECT_OS_TREE_HPP
 
+#include "Graph.hpp"
 
-class Tree {
+using namespace std;
+
+class Tree: public Graph{
+
+public:
+    Tree() = default;
+    int getTotalWeight();
+
+    int longestDistance();
+
+    int avarageDistance();
+
+    int shortestDistance();
 
 };
 

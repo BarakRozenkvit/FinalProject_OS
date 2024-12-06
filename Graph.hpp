@@ -1,9 +1,10 @@
 #include <vector>
 #include "Guard.hpp"
 #include <iostream>
+#pragma once
 
 using namespace std;
-//
+
 class Graph: public Guard{
     
     vector<vector<int>> _graph;
@@ -13,7 +14,7 @@ public:
     Graph() = default;
     ~Graph() = default;
 
-    void NewGraph(int n);
+    void newGraph(int n);
 
     void addEdge(int v, int u, int w);
 
@@ -22,6 +23,8 @@ public:
     int vertexNum();
 
     int edgeNum();
+
+    int at(int v, int u);
 
     const vector<vector<int>>& getGraph() const{
         return _graph;

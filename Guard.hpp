@@ -3,7 +3,7 @@
 //
 #include <mutex>
 #include <pthread.h>
-
+#pragma once
 
 class Guard{
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
