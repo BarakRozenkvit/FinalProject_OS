@@ -1,7 +1,7 @@
 #include <mutex>
 #include <pthread.h>
 #include "Graph.hpp"
-
+#pragma once
 
 class MainGraph: public Graph{
 private:

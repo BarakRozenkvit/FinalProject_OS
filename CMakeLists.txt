@@ -15,6 +15,10 @@ add_executable(FinalProject_OS
         Algo.hpp
         Tree.cpp
         Tree.hpp
-        HandleClient.cpp
-        HandleClient.hpp
+        ClientHandler.cpp
+        ClientHandler.hpp
+        Proactor.cpp
+        Proactor.hpp
+        Reactor.cpp
+        Reactor.hpp
         )
