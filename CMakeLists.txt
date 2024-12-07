@@ -8,11 +8,13 @@ include_directories(.)
 add_executable(FinalProject_OS
         Graph.cpp
         Graph.hpp
-        Guard.cpp
-        Guard.hpp
         Server.cpp
-        MSTAlgo.cpp
-        MSTAlgo.hpp
+        MainGraph.cpp
+        MainGraph.hpp
+        Algo.cpp
+        Algo.hpp
         Tree.cpp
         Tree.hpp
+        HandleClient.cpp
+        HandleClient.hpp
         )

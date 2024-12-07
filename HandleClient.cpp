@@ -4,33 +4,29 @@
 //
 #include "HandleClient.hpp"
 
-ClientHandler::
-static string Kosaraju::handle_client_command(vector<list<int>>& adj, string command) {
+void ClientHandler::handle(MainGraph* graph, std::string command) {
+    MainGraph::lockInstance();
     string ans;
     if (command == "Newgraph\n") {
-        ans += "Creating new graph\n";
-        ans += createNewGraph(adj);
-    } else if (command == "Kosaraju\n") {
-        int n = adj.size() - 1;
-        ans = Kosaraju_list(n, adj);
+        graph->newGraph();
+    } else if (command == "MST\n") {
+        ans = MSTAlgo::FactoryAlgo::applyAlgo(graph, algo);
     } else if (command == "Newedge\n") {
         int u, v;
         cin >> u >> v;
-        adj[u].push_back(v);
-        ans += "New edge added between " + to_string(u) + " and " + to_string(v) + "\n";
+        graph->addEdge(u,v,w)
         fflush(stdout);
     } else if (command == "Removeedge\n") {
         int u, v;
         cin >> u >> v;
-        auto it = find(adj[u].begin(), adj[u].end(), v);
-        if (it != adj[u].end()) {
-            adj[u].erase(it);
-            ans += "Edge removed between " + to_string(u) + " and " + to_string(v) + "\n";
-            fflush(stdout);
-        }
+        graph->removeEdge(u, v)
+        ans += "Edge removed between " + to_string(u) + " and " + to_string(v) + "\n";
+        fflush(stdout);
     } else {
         cout << "Unknown command: " << command << endl;
         fflush(stdout);
     }
+    MainGraph::unlockInstance();
     return ans;
+
 }

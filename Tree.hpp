@@ -6,20 +6,27 @@
 #define FINALPROJECT_OS_TREE_HPP
 
 #include "Graph.hpp"
+#pragma once
 
 using namespace std;
 
 class Tree: public Graph{
 
+    Graph _distances;
+    bool _calculated = false;
+
 public:
-    Tree() = default;
+    Tree()=default;
+
     int getTotalWeight();
 
     int longestDistance();
 
-    int avarageDistance();
+    double avarageDistance();
 
     int shortestDistance();
+
+    int calculateDistances();
 
 };
 

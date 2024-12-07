@@ -9,9 +9,11 @@ void Graph::newGraph(int n) {
 }
 
 void Graph::addEdge(int v, int u, int w) {
+    if (_graph[v][u] > 0 && w > 0){
+        _edgeCounter++;
+    }
     _graph[v][u] = w;
     _graph[u][v] = w;
-    _edgeCounter++;
 }
 
 void Graph::removeEdge(int v, int u) {
@@ -30,4 +32,9 @@ int Graph::vertexNum() {
 
 int Graph::at(int v, int u) {
     return _graph[v][u];
+}
+
+Graph::Graph(Graph const &g) {
+    _graph = g._graph;
+    _edgeCounter = g._edgeCounter;
 }

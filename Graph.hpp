@@ -1,17 +1,17 @@
 #include <vector>
-#include "Guard.hpp"
 #include <iostream>
 #pragma once
 
 using namespace std;
 
-class Graph: public Guard{
-    
+class Graph{
+
     vector<vector<int>> _graph;
     int _edgeCounter;
 
 public:
-    Graph() = default;
+    Graph() =default;
+    Graph(const Graph &g);
     ~Graph() = default;
 
     void newGraph(int n);
