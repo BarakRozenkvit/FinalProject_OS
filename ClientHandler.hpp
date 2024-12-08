@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <condition_variable>
 #include <mutex>
+#include <sstream>
 #include <pthread.h>
 #include <vector>
 #include "Proactor.hpp"
@@ -21,7 +22,7 @@ using namespace std;
 
 namespace ClientHandler{
 
-    string handleGraph(int fd);
+    int handleGraph(int fd);
 
     void* handleClient(int fd);
 

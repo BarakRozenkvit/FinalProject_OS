@@ -90,5 +90,6 @@ do dij(k) ← min (dij(k-1), dik(k-1) + dkj(k-1))
 }
 
 Tree MSTAlgo::FactoryAlgo::applyAlgo(std::string algo) {
+
 }
 

@@ -9,6 +9,12 @@ void Graph::newGraph(int n) {
 }
 
 void Graph::addEdge(int v, int u, int w) {
+    if (v >= vertexNum() || u >= vertexNum() || v < 0 || u < 0){
+        throw invalid_argument("index out of bounds!");
+    }
+    if (w < 0){
+        throw invalid_argument("negative weight not allowed!");
+    }
     if (_graph[v][u] > 0 && w > 0){
         _edgeCounter++;
     }
