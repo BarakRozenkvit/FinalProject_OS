@@ -22,9 +22,13 @@ vector<pthread_t> handlers = {};
 
 namespace ClientHandler{
 
+    string handleGraph(MainGraph* graph, string cmd);
+
     void* handleClient(MainGraph* graph, int fd);
 
     string inputHandler(string message,int fd);
+
+    void outputHandler(string message);
 
     void* handleConnection(MainGraph* graph, int fd);
 
