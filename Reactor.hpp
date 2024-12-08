@@ -8,7 +8,7 @@
 using namespace std;
 
 // Define function for clients or listener
-typedef void * (*reactorFunc) (MainGraph* graph, int fd);
+typedef void * (*reactorFunc) (int fd);
 // map fds to its function
 struct fd_to_func{
     int fd;

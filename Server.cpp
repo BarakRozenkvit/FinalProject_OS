@@ -6,7 +6,6 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <condition_variable>
@@ -75,7 +74,7 @@ int main() {
             if (reactor->pfds[i].revents & POLLIN && reactor->pfds[i].fd != -1) {
                 int hot_fd = reactor->pfds[i].fd;
                 if (listener == hot_fd) {
-                    void *fds = reactor->f2f[i].func(graph, hot_fd);
+                    void *fds = reactor->f2f[i].func(hot_fd);
                     int res = *(int *) fds;
                     free(fds);
                     if (res == -1) {

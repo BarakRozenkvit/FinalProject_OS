@@ -3,24 +3,25 @@
 //
 //
 #include "ClientHandler.hpp"
-#include "Proactor.hpp"
 
-void ClientHandler::handleGraph(MainGraph* graph, string cmd) {
+
+string ClientHandler::handleGraph(int fd) {
+    MainGraph* graph = MainGraph::getInstance();
     MainGraph::lockInstance();
-    string cmd = ClientHandler::inputHandler("choose:",fd);
-    if (cmd == "Newgraph\n") {
+    string cmd = ClientHandler::inputHandler("Choose",fd);
+    if (cmd == "Newgraph") {
         graph->newGraph(2);
-    } else if (cmd == "MST\n") {
-        cmd = MSTAlgo::FactoryAlgo::applyAlgo(graph, cmd);
-    } else if (cmd == "Newedge\n") {
-        int u, v;
-        cin >> u >> v;
-        graph->addEdge(u,v,w)
+    } else if (cmd == "MST") {
+        MSTAlgo::FactoryAlgo::applyAlgo(cmd);
+    } else if (cmd == "Newedge") {
+        int u, v, w;
+        cin >> u >> v >> w;
+        graph->addEdge(u,v,w);
         fflush(stdout);
-    } else if (cmd == "Removeedge\n") {
+    } else if (cmd == "Removeedge") {
         int u, v;
         cin >> u >> v;
-        graph->removeEdge(u, v)
+        graph->removeEdge(u, v);
         cmd += "Edge removed between " + to_string(u) + " and " + to_string(v) + "\n";
         fflush(stdout);
     } else {
@@ -32,8 +33,8 @@ void ClientHandler::handleGraph(MainGraph* graph, string cmd) {
 
 }
 
-void* ClientHandler::handleConnection(MainGraph *graph, int fd) {
-
+void* ClientHandler::handleConnection(int fd) {
+    MainGraph::getInstance();
     struct sockaddr_in client_address;
     socklen_t clientAddressLen = sizeof(client_address);
     memset(&client_address, 0, sizeof(client_address));
@@ -44,7 +45,7 @@ void* ClientHandler::handleConnection(MainGraph *graph, int fd) {
         return new int(-1);
     }
     cout << "Client connected, Fd: " << client_fd << endl;
-    pthread_t id = startProactor(graph ,client_fd, ClientHandler::handleClient);
+    pthread_t id = startProactor(client_fd, ClientHandler::handleClient);
     handlers.push_back(id);
     cout << "Create new Thread for Fd: " << client_fd << endl;
     return new int(client_fd);
@@ -53,34 +54,39 @@ void* ClientHandler::handleConnection(MainGraph *graph, int fd) {
 
 string ClientHandler::inputHandler(string message,int fd) {
 
-    char buf[256];
-    int nbytes = recv(fd, buf, sizeof buf,0);
-
-    if (nbytes < 0) {
-        throw runtime_error("recv");
+    int in = dup2(fd, STDIN_FILENO);int out = dup2(fd,STDOUT_FILENO);
+    if (in == -1 || out == -1) {
+        perror("dup2");
+        close(fd);
     }
-    else if (nbytes == 0) {
+
+    cout << message << endl;
+
+    string input;
+    cin >> input;
+
+    if (input == ""){
         cout << "Exit Theard: Fd " << fd << endl;
         exit(1);
     }
-    else {
-        // if has data send it to client handler, dup std in and out to client
-        // so every message from him goes to function and from function to him
-        buf[nbytes] = '\0';
-        string command(buf); // Convert the C-string to a C++ string for easier handling
-        int res = dup2(fd, STDIN_FILENO);
-        if (res == -1) {
-            perror("dup2");
-            close(fd);
-        }
-    }
+
+    return input;
 }
 
-void* ClientHandler::handleClient(MainGraph *graph, int fd) {
+void* ClientHandler::handleClient(int fd) {
+    MainGraph* graph = MainGraph::getInstance();
     while (1) {
-        string input = ClientHandler::inputHandler("Choose",fd);
-        string output = ClientHandler::handleGraph(graph, input);  // Process the command and generate a response
-        ClientHandler::outputHandler(output);
+        string output = ClientHandler::handleGraph(fd);  // Process the command and generate a response
     }
     return nullptr;
+}
+
+void ClientHandler::outputHandler(string message,int fd) {
+    int out = dup2(fd,STDOUT_FILENO);
+    if (out == -1) {
+        perror("dup2");
+        close(fd);
+    }
+
+    cout << message << endl;
 }

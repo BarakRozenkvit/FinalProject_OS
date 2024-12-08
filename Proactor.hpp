@@ -9,11 +9,14 @@
 #include <iostream>
 #include <pthread.h>
 #include <signal.h>
+#include <vector>
 #include "MainGraph.hpp"
+
+#pragma once
 
 using namespace std;
 
-typedef void * (* proactorFunc) (MainGraph* graph, int sockfd);
+typedef void * (* proactorFunc) (int sockfd);
 
 // Struct to hold the original function and its argument
 typedef struct {
@@ -26,7 +29,7 @@ typedef struct {
 void* thread_wrapper(void* arg) ;
 
 // starts new proactor and returns proactor thread id.
-pthread_t startProactor(MainGraph* graph, int sockfd, proactorFunc threadFunc);
+pthread_t startProactor(int sockfd, proactorFunc threadFunc);
 
 // stops proactor by threadid
 int stopProactor(pthread_t tid) ;
