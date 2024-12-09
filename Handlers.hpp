@@ -8,7 +8,8 @@
 #pragma once
 #include <vector>
 #include <pthread.h>
+#include <utility>
 
-extern std::vector<pthread_t> handlers; // Declaration
+extern std::vector<std::pair<pthread_t,void*>> handlers; // Declaration
 
 #endif //FINALPROJECT_OS_HANDLERS_HPP

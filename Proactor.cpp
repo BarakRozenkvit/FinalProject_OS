@@ -3,31 +3,29 @@
 using namespace std;
 
 // Wrapper function.
-void* thread_wrapper(void* arg) {
-    ThreadData* data = (ThreadData*)arg;
-    void* result = data->func(data->sockfd);
-    free(data);  // Free the ThreadData after use
-    return result;
+void* proactorWrapper(void* arg) {
+    proactorArgs* data = static_cast<proactorArgs*>(arg);
+    return data->func(data->sockfd);
 }
 
-// starts new proactor and returns proactor thread id.
-pthread_t startProactor(int sockfd, proactorFunc threadFunc) {
+pair<pthread_t,void*> startProactor(int sockfd, proactorFunc threadFunc) {
     pthread_t thread;
-    ThreadData *data = (ThreadData *) malloc(sizeof(ThreadData));
-    if (data == NULL) {
+    proactorArgs *data = (proactorArgs *) malloc(sizeof(proactorArgs));
+    if (!data) {
         perror("malloc");
-        return (pthread_t) 0;  // Return an invalid thread ID on error
+        return make_pair((pthread_t) 0,nullptr);
     }
+
     data->func = threadFunc;
     data->sockfd = sockfd;
 
-    int ret = pthread_create(&thread, NULL, thread_wrapper, data);
+    int ret = pthread_create(&thread, nullptr, proactorWrapper, data);
     if (ret != 0) {
         perror("pthread_create");
         free(data);
-        return (pthread_t) 0;  // Return an invalid thread ID on error
+        return make_pair((pthread_t) 0,nullptr);
     }
-    return thread;
+    return make_pair(thread,data);
 }
 
 

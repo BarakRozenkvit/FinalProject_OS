@@ -4,4 +4,4 @@
 
 #include "Handlers.hpp"
 
-std::vector<pthread_t> handlers; // Definition
+std::vector<std::pair<pthread_t,void*>> handlers; // Definition

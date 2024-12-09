@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <vector>
 #include "MainGraph.hpp"
+#include "Handlers.hpp"
 
 #pragma once
 
@@ -22,14 +23,15 @@ typedef void * (* proactorFunc) (int sockfd);
 typedef struct {
     proactorFunc func;
     int sockfd;
-    MainGraph* graph;
-} ThreadData;
+} proactorArgs;
+
+void signalHandler1(int signal);
 
 // Wrapper function.
 void* thread_wrapper(void* arg) ;
 
 // starts new proactor and returns proactor thread id.
-pthread_t startProactor(int sockfd, proactorFunc threadFunc);
+pair<pthread_t,void*> startProactor(int sockfd, proactorFunc threadFunc);
 
 // stops proactor by threadid
 int stopProactor(pthread_t tid) ;

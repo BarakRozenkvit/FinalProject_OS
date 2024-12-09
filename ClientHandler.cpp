@@ -101,12 +101,10 @@ void* ClientHandler::handleConnection(int fd) {
         perror("accept");
         return new int(-1);
     }
-    pthread_t id = startProactor(client_fd, ClientHandler::handleClient);
+    pair<pthread_t,void*> id = startProactor(client_fd, ClientHandler::handleClient);
     handlers.push_back(id);
-    stopProactor(id);
     cout << "Create new Thread for Fd: " + to_string(client_fd)  << endl;
     return new int(client_fd);
-
 }
 
 string ClientHandler::inputHandler(string message,int fd) {
