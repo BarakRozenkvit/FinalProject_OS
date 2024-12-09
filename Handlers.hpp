@@ -11,5 +11,7 @@
 #include <utility>
 
 extern std::vector<std::pair<pthread_t,void*>> handlers; // Declaration
+extern pthread_cond_t cond;
+extern pthread_mutex_t mtx;
 
 #endif //FINALPROJECT_OS_HANDLERS_HPP

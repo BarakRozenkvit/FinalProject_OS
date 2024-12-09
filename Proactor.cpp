@@ -5,7 +5,10 @@ using namespace std;
 // Wrapper function.
 void* proactorWrapper(void* arg) {
     proactorArgs* data = static_cast<proactorArgs*>(arg);
-    return data->func(data->sockfd);
+    void* result = data->func(data->sockfd);
+    data-> pause = true;
+    pthread_cond_signal(&cond);
+    return result;
 }
 
 pair<pthread_t,void*> startProactor(int sockfd, proactorFunc threadFunc) {
@@ -18,6 +21,7 @@ pair<pthread_t,void*> startProactor(int sockfd, proactorFunc threadFunc) {
 
     data->func = threadFunc;
     data->sockfd = sockfd;
+    data->pause = false;
 
     int ret = pthread_create(&thread, nullptr, proactorWrapper, data);
     if (ret != 0) {
@@ -29,7 +33,20 @@ pair<pthread_t,void*> startProactor(int sockfd, proactorFunc threadFunc) {
 }
 
 
-int stopProactor(pthread_t tid){
-    pthread_kill(tid,0);
+int stopProactor(pthread_t tid,proactorArgs* args){
+    pthread_detach(tid);
+    free(args);
     return 0;
+}
+
+void* handleProactors(int){
+    while(1){
+        pthread_cond_wait(&cond,&mtx);
+        for (auto id: handlers){
+            proactorArgs* data = static_cast<proactorArgs*>(id.second);
+            if(data->pause){
+                stopProactor(id.first,data);
+            }
+        }
+    }
 }

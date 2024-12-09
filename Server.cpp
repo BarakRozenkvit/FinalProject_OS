@@ -78,6 +78,8 @@ int main()
     signal(SIGINT, signalHandler);
     signal(SIGKILL, signalHandler);
 
+    ClientHandler::monitorHandlers();
+
     int listener = get_listener_socket();
     if (listener == -1)
     {
@@ -90,10 +92,8 @@ int main()
     while (reactor->run)
     {
         int poll_count = poll(reactor->pfds, reactor->fd_count, -1);
-        if (poll_count == -1)
-        {
-            if (errno == EINTR)
-            {
+        if (poll_count == -1){
+            if (errno == EINTR){
                 signalHandler(SIGINT);
             }
             perror("poll");

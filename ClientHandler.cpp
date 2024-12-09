@@ -102,7 +102,9 @@ void* ClientHandler::handleConnection(int fd) {
         return new int(-1);
     }
     pair<pthread_t,void*> id = startProactor(client_fd, ClientHandler::handleClient);
+    pthread_mutex_lock(&mtx);
     handlers.push_back(id);
+    pthread_mutex_unlock(&mtx);
     cout << "Create new Thread for Fd: " + to_string(client_fd)  << endl;
     return new int(client_fd);
 }
@@ -142,4 +144,11 @@ void ClientHandler::outputHandler(string message,int fd) {
         perror("send");
         exit(1);
     }
+}
+
+void ClientHandler::monitorHandlers(){
+    pair<pthread_t,void*> id = startProactor(0, handleProactors);
+    pthread_mutex_lock(&mtx);
+    handlers.push_back(id);
+    pthread_mutex_unlock(&mtx);
 }

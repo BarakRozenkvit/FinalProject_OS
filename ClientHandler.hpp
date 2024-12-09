@@ -32,4 +32,6 @@ namespace ClientHandler{
 
     void* handleConnection(int fd);
 
+    void monitorHandlers();
+
 }
