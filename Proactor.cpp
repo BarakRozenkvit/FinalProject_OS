@@ -22,7 +22,7 @@ pair<pthread_t,void*> startProactor(int sockfd, proactorFunc threadFunc) {
     data->func = threadFunc;
     data->sockfd = sockfd;
     data->pause = false;
-
+    cout << "Starting proactor fd: " << data->sockfd << endl;
     int ret = pthread_create(&thread, nullptr, proactorWrapper, data);
     if (ret != 0) {
         perror("pthread_create");
@@ -34,7 +34,7 @@ pair<pthread_t,void*> startProactor(int sockfd, proactorFunc threadFunc) {
 
 
 int stopProactor(pthread_t tid,proactorArgs* args){
-    pthread_detach(tid);
+    pthread_kill(tid,0);
     free(args);
     return 0;
 }
@@ -45,6 +45,7 @@ void* handleProactors(int){
         for (auto id: handlers){
             proactorArgs* data = static_cast<proactorArgs*>(id.second);
             if(data->pause){
+                cout << "Stopping proactor fd: " << data->sockfd << endl;
                 stopProactor(id.first,data);
             }
         }

@@ -62,10 +62,14 @@ void signalHandler(int signal)
     if (signal == SIGINT || signal == SIGKILL)
     {
         std::cout << "shutting down gracefully..." << std::endl;
+        pthread_mutex_lock(&mtx);
         for(auto id:handlers){
             pthread_kill(id.first,0);
-            free(id.second);
+            proactorArgs* data = static_cast<proactorArgs*>(id.second);
+            close(data->sockfd);
+            free(data);
         }
+        pthread_mutex_unlock(&mtx);
         exit(0);
     }
 }

@@ -105,7 +105,6 @@ void* ClientHandler::handleConnection(int fd) {
     pthread_mutex_lock(&mtx);
     handlers.push_back(id);
     pthread_mutex_unlock(&mtx);
-    cout << "Create new Thread for Fd: " + to_string(client_fd)  << endl;
     return new int(client_fd);
 }
 
@@ -120,10 +119,11 @@ string ClientHandler::inputHandler(string message,int fd) {
     char buffer[256] = {'\0'};
     size_t receiveBytes = recv(fd,buffer,sizeof (buffer),0);
     if(receiveBytes == 0){
-        cout << "Exit Theard: Fd " << fd << endl;
-        exit(1);
+        close(fd);
+        return "Exit";
     }
     if (receiveBytes < 0 ){
+        perror("recv");
         return "Exit";
     }
 
