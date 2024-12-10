@@ -13,12 +13,15 @@
 #include <pthread.h>
 #include <vector>
 #include "Proactor.hpp"
-#include "Handlers.hpp"
 #include "Algo.hpp"
 #include "MainGraph.hpp"
 #pragma once
 
 using namespace std;
+
+extern std::vector<std::pair<pthread_t,void*>> handlers; // Declaration
+extern pthread_cond_t condHandler;
+extern pthread_mutex_t mutexHandler;
 
 namespace ClientHandler{
 
@@ -32,6 +35,10 @@ namespace ClientHandler{
 
     void* handleConnection(int fd);
 
-    void monitorHandlers();
+    void* monitorHandlers(int);
+
+    void startMonitorHandlers();
+
+    void killHandlers();
 
 }

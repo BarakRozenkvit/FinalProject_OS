@@ -1,7 +1,6 @@
 //
 // Created by Barak Rozenkvit on 04/12/2024.
 
-#include "Algo.hpp"
 #include "MainGraph.hpp"
 #include <netinet/in.h>
 #include <string.h>
@@ -11,7 +10,6 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#include "Proactor.hpp"
 #include "Reactor.hpp"
 #include "ClientHandler.hpp"
 
@@ -62,14 +60,7 @@ void signalHandler(int signal)
     if (signal == SIGINT || signal == SIGKILL)
     {
         std::cout << "shutting down gracefully..." << std::endl;
-        pthread_mutex_lock(&mtx);
-        for(auto id:handlers){
-            pthread_kill(id.first,0);
-            proactorArgs* data = static_cast<proactorArgs*>(id.second);
-            close(data->sockfd);
-            free(data);
-        }
-        pthread_mutex_unlock(&mtx);
+        ClientHandler::killHandlers();
         exit(0);
     }
 }
@@ -82,7 +73,7 @@ int main()
     signal(SIGINT, signalHandler);
     signal(SIGKILL, signalHandler);
 
-    ClientHandler::monitorHandlers();
+    ClientHandler::startMonitorHandlers();
 
     int listener = get_listener_socket();
     if (listener == -1)

@@ -21,6 +21,4 @@ add_executable(FinalProject_OS
         Proactor.hpp
         Reactor.cpp
         Reactor.hpp
-        Handlers.hpp
-        Handlers.cpp
         )

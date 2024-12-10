@@ -10,7 +10,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <vector>
-#include "Handlers.hpp"
+#include <utility>
 
 #pragma once
 
@@ -33,5 +33,3 @@ pair<pthread_t,void*> startProactor(int sockfd, proactorFunc threadFunc);
 
 // stops proactor by threadid
 int stopProactor(pthread_t tid,proactorArgs* args) ;
-
-void* handleProactors(int);

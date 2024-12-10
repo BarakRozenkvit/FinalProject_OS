@@ -2,12 +2,15 @@
 
 using namespace std;
 
+std::vector<std::pair<pthread_t,void*>> proactors; // Definition
+pthread_cond_t condProactor = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutexProactor = PTHREAD_MUTEX_INITIALIZER;
+
 // Wrapper function.
 void* proactorWrapper(void* arg) {
     proactorArgs* data = static_cast<proactorArgs*>(arg);
     void* result = data->func(data->sockfd);
     data-> pause = true;
-    pthread_cond_signal(&cond);
     return result;
 }
 
@@ -37,17 +40,4 @@ int stopProactor(pthread_t tid,proactorArgs* args){
     pthread_kill(tid,0);
     free(args);
     return 0;
-}
-
-void* handleProactors(int){
-    while(1){
-        pthread_cond_wait(&cond,&mtx);
-        for (auto id: handlers){
-            proactorArgs* data = static_cast<proactorArgs*>(id.second);
-            if(data->pause){
-                cout << "Stopping proactor fd: " << data->sockfd << endl;
-                stopProactor(id.first,data);
-            }
-        }
-    }
 }

@@ -1,5 +1,8 @@
 #include "ClientHandler.hpp"
 
+std::vector<std::pair<pthread_t,void*>> handlers; // Definition
+pthread_cond_t condHandler = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutexHandler = PTHREAD_MUTEX_INITIALIZER;
 
 int ClientHandler::handleGraph(int fd) {
     ClientHandler::outputHandler("\033[2J\033[H",fd);
@@ -102,9 +105,9 @@ void* ClientHandler::handleConnection(int fd) {
         return new int(-1);
     }
     pair<pthread_t,void*> id = startProactor(client_fd, ClientHandler::handleClient);
-    pthread_mutex_lock(&mtx);
+    pthread_mutex_lock(&mutexHandler);
     handlers.push_back(id);
-    pthread_mutex_unlock(&mtx);
+    pthread_mutex_unlock(&mutexHandler);
     return new int(client_fd);
 }
 
@@ -135,6 +138,7 @@ string ClientHandler::inputHandler(string message,int fd) {
 
 void* ClientHandler::handleClient(int fd) {
     while (ClientHandler::handleGraph(fd)) {}
+    pthread_cond_signal(&condHandler);
     return nullptr;
 }
 
@@ -146,9 +150,33 @@ void ClientHandler::outputHandler(string message,int fd) {
     }
 }
 
-void ClientHandler::monitorHandlers(){
-    pair<pthread_t,void*> id = startProactor(0, handleProactors);
-    pthread_mutex_lock(&mtx);
+void* ClientHandler::monitorHandlers(int){
+    while(1){
+        pthread_cond_wait(&condHandler,&mutexHandler);
+        for (auto id: handlers){
+            proactorArgs* data = static_cast<proactorArgs*>(id.second);
+            if(data->pause){
+                cout << "Stopping proactor fd: " << data->sockfd << endl;
+                stopProactor(id.first,data);
+            }
+        }
+    }
+}
+
+void ClientHandler::startMonitorHandlers(){
+    pair<pthread_t,void*> id = startProactor(0, ClientHandler::monitorHandlers);
+    pthread_mutex_lock(&mutexHandler);
     handlers.push_back(id);
-    pthread_mutex_unlock(&mtx);
+    pthread_mutex_unlock(&mutexHandler);
+}
+
+void ClientHandler::killHandlers(){
+        pthread_mutex_lock(&mutexHandler);
+        for(auto id: handlers){
+            pthread_kill(id.first,0);
+            proactorArgs* data = static_cast<proactorArgs*>(id.second);
+            close(data->sockfd);
+            free(data);
+        }
+        pthread_mutex_unlock(&mutexHandler);
 }
