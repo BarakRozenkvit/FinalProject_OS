@@ -24,3 +24,14 @@ add_executable(FinalProject_OS
         Handlers.hpp
         Handlers.cpp
         )
+
+add_executable(Kruskal
+ Algo.hpp
+        Algo.cpp
+        Tree.hpp
+        Tree.cpp
+        MainGraph.hpp
+        MainGraph.cpp
+        Graph.hpp
+        Graph.cpp
+)

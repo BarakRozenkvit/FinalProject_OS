@@ -6,6 +6,7 @@
 #define FINALPROJECT_OS_TREE_HPP
 
 #include "Graph.hpp"
+#include <climits>
 #pragma once
 
 using namespace std;
@@ -26,7 +27,7 @@ public:
 
     int shortestDistance();
 
-    int calculateDistances();
+    void calculateDistances();
 
 };
 

@@ -8,7 +8,7 @@
 #include <stdexcept> // For standard exception types
 
 
-int Tree::calculateDistances() {
+void Tree::calculateDistances() {
     _distances = DistanceAlgo::FloyedMarshal(*this);
     _calculated = true;
 }

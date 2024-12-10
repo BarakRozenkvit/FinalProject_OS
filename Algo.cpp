@@ -68,6 +68,49 @@ Tree MSTAlgo::Prim(Graph* graph){
     return tree;
 }
 
+Tree MSTAlgo::Kruskal(Graph* graph){
+    int V = graph->vertexNum();
+    vector<pair<int, pair<int, int>>> edges;
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < V; j++) {
+            if (graph->at(i,j) != 0) {
+                edges.push_back({graph->at(i,j), {i, j}});
+            }
+        }
+    }
+    sort(edges.begin(), edges.end());
+
+    Tree tree;
+    tree.newGraph(graph->vertexNum());
+    int* parent = new int[V];
+    for (int i = 0; i < V; i++) {
+        parent[i] = i;
+    }
+    int i = 0, e = 0;
+    while (e < V - 1 && i < edges.size()) {
+        int w = edges[i].first;
+        int u = edges[i].second.first;
+        int v = edges[i].second.second;
+        i++;
+        int x = u;
+        int y = v;
+        while (parent[x] != x) {
+            x = parent[x];
+        }
+        while (parent[y] != y) {
+            y = parent[y];
+        }
+        if (x != y) {
+            tree.addEdge(u,v,w);
+            tree.addEdge(v,u,w);
+            e++;
+            parent[x] = y;
+        }
+    }
+    return tree;
+}
+
+
 Graph DistanceAlgo::FloyedMarshal(Graph g) {
     /**
      * 1. D(0) ← W
@@ -89,7 +132,21 @@ do dij(k) ← min (dij(k-1), dik(k-1) + dkj(k-1))
     return g;
 }
 
-Tree MSTAlgo::FactoryAlgo::applyAlgo(std::string algo) {
-
+Tree MSTAlgo::FactoryAlgo::applyAlgo(Graph* graph, std::string algoName) {
+    // Determine the algorithm to use
+    if (algoName == "Prim") {
+        return Prim(graph);
+    } else if (algoName == "Kruskal") {
+        return Kruskal(graph); // Note: Kruskal accepts a reference to the graph
+    } else {
+        throw std::invalid_argument("Unsupported algorithm: " + algoName);
+    }
+    // An empty tree is returned if the algorithm is not supported
+    return Tree();
 }
 
+// int main () {
+
+//     MainGraph* graph = MainGraph::getInstance();
+//     return 0;
+// }
