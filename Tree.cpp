@@ -9,7 +9,7 @@
 
 
 void Tree::calculateDistances() {
-    _distances = DistanceAlgo::FloyedMarshal(*this);
+    _distances = DistanceAlgo::FloyedWarshall(*this);
     _calculated = true;
 }
 
