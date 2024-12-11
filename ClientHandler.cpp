@@ -170,7 +170,9 @@ void ClientHandler::startMonitorHandlers(){
     pthread_mutex_unlock(&mutexHandler);
 }
 
-void ClientHandler::killHandlers(){
+void ClientHandler::killHandlers(int signal){
+    if (signal == SIGINT || signal == SIGKILL){
+        std::cout << "shutting down gracefully..." << std::endl;
         pthread_mutex_lock(&mutexHandler);
         for(auto id: handlers){
             pthread_kill(id.first,0);
@@ -179,4 +181,6 @@ void ClientHandler::killHandlers(){
             free(data);
         }
         pthread_mutex_unlock(&mutexHandler);
+        exit(0);
+    }
 }
