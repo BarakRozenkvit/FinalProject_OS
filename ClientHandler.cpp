@@ -35,7 +35,7 @@ int ClientHandler::handleGraph(int fd) {
         ClientHandler::outputHandler("\033[2J\033[H",fd);
         string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
         try {
-            MSTAlgo::FactoryAlgo::applyAlgo(algo);
+            MSTAlgo::FactoryAlgo::applyAlgo(graph, algo);
         }
         catch (const invalid_argument& e){
             ClientHandler::outputHandler("\033[2J\033[H",fd);

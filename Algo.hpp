@@ -1,6 +1,8 @@
 #include "Tree.hpp"
 #include "Graph.hpp"
+#include "MainGraph.hpp"
 #include <string>
+#include <queue>
 #pragma once
 
 namespace MSTAlgo{
@@ -9,7 +11,7 @@ namespace MSTAlgo{
 
     Tree Prim(Graph* g);
 
-    Tree Kruskal(Graph& g);
+    Tree Kruskal(Graph* g);
 
     Tree Tarjan(Graph& g);
 
@@ -18,7 +20,7 @@ namespace MSTAlgo{
     class FactoryAlgo{
 
     public:
-        static Tree applyAlgo(string algo);
+        static Tree applyAlgo(Graph* algo, std::string algoName);
 
     };
 }

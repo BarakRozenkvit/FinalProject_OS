@@ -22,3 +22,14 @@ add_executable(FinalProject_OS
         Reactor.cpp
         Reactor.hpp
         )
+
+add_executable(Kruskal
+ Algo.hpp
+        Algo.cpp
+        Tree.hpp
+        Tree.cpp
+        MainGraph.hpp
+        MainGraph.cpp
+        Graph.hpp
+        Graph.cpp
+)
