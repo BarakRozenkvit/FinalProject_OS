@@ -144,7 +144,7 @@ std::pair<Tree, std::string> MSTAlgo::FactoryAlgo::applyAlgoWithDetails(Graph* g
     details << "Total Weight: " << mst.getTotalWeight() << "\n";
     details << "Longest Distance: " << mst.longestDistance() << "\n";
     details << "Shortest Distance: " << mst.shortestDistance() << "\n";
-    details << "Average Distance: " << mst.avarageDistance() << "\n";
+    details << "Average Distance: " << mst.averageDistance() << "\n";
 
     return {mst, details.str()};
 }
