@@ -10,25 +10,19 @@ using namespace std;
 
 template <typename Incoming, typename Outgoing>
 class ActiveObject{
-
+protected:
     queue<Incoming> _tasks;
     pthread_mutex_t _mutex;
     pthread_cond_t _cond;
-    ActiveObject* _next;
+    Outgoing(*_process)(Incoming)
+    void* _next;
 
 public:
-    ActiveObject(ActiveObject* next);
-    virtual void execute() =0;
+    ActiveObject(Outgoing(*process)(Incoming),void* next);
+    void run();
     void getTask(Incoming task);
     void forwardTask(Outgoing task);
-};
-
-class Kruskal: public ActiveObject<Graph,Tree>{
-public:
-    void execute() override;
-};
-
-class Prim: public ActiveObject<Graph,Tree>{
-public:
-    void execute() override;
+    void* nextStage(){
+        return _next;
+    }
 };

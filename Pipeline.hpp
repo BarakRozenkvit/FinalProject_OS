@@ -1,5 +1,7 @@
 #include <vector>
 #include "ActiveObject.hpp"
+#include "Graph.hpp"
+#include "Tree.hpp"
 
 // class Pipeline{
 
@@ -11,17 +13,23 @@
 
 class PipelinePrim{
 
-    // Pipeline order of Active Objects
-    vector<ActiveObject*> _pipeline;
+    void* _pipline;
 
 public:
     PipelinePrim(){
-
-        
+        _pipline = new ActiveObject<Graph,Tree>(MSTAlgo::Prim,nullptr);
     }
 
-        // Starting all active objects in diffrent thread
-        execute();
+    void build(){
+        
+        _pipline = new ActiveObject<Graph,Tree>(MSTAlgo::Prim,nullptr);
+    }
+    void execute(){
+
+        while(_pipline->nextStage()!=nullptr){
+
+        }
+    }
         // getting new task to pipeline
         enqueue_new_task();
 
