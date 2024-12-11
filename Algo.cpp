@@ -2,8 +2,8 @@
 
 #include <algorithm>  // for std::min
 
-Tree MSTAlgo::Prim(Graph* graph) {
-    int v = graph->vertexNum();
+Tree MSTAlgo::Prim(Graph& graph) {
+    int v = graph.vertexNum();
     // vector to store the parent of vertex
     vector<int> parent(v);
 
@@ -46,21 +46,21 @@ Tree MSTAlgo::Prim(Graph* graph) {
             // and the edge weight of neighbouring
             // vertex is less than key value of
             // neighbouring vertex then update it.
-            if (!vis[i] && graph->at(node, i) != 0 && graph->at(node, i) < key[i]) {
-                pq.push({graph->at(node, i), i});
-                key[i] = graph->at(node, i);
+            if (!vis[i] && graph.at(node, i) != 0 && graph.at(node, i) < key[i]) {
+                pq.push({graph.at(node, i), i});
+                key[i] = graph.at(node, i);
                 parent[i] = node;
             }
         }
     }
 
     Tree tree;
-    tree.newGraph(graph->vertexNum());
+    tree.newGraph(graph.vertexNum());
     // Print the edges and their
     // weights in the MST
     for (int i = 1; i < v; i++) {
-        tree.addEdge(parent[i], i, graph->at(i, parent[i]));
-        tree.addEdge(i, parent[i], graph->at(i, parent[i]));
+        tree.addEdge(parent[i], i, graph.at(i, parent[i]));
+        tree.addEdge(i, parent[i], graph.at(i, parent[i]));
     }
     return tree;
 }

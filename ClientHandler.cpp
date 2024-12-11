@@ -42,15 +42,22 @@ int ClientHandler::handleGraph(int fd) {
     // }
     else if (cmd == "MST") {
         string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
-        try {
-            auto [mst, details] = MSTAlgo::FactoryAlgo::applyAlgoWithDetails(graph, algo);
-
-            // Output the MST details to the client.
-            ClientHandler::outputHandler("MST Details:\n" + details, fd);
-        } catch (const std::invalid_argument& e) {
-            ClientHandler::outputHandler(e.what(), fd);
-            sleep(1);
+        // in Pipeline, gives a deep copy of graph for async calculation
+        if (algo == "Prim"){
+            PipelinePrim.enque_taks(graph);
         }
+        else if(algo == "Kruskal"){
+            PipelineKruskal.enqueue_taks(graph);
+        }
+        
+        // try {
+        //     auto [mst, details] = MSTAlgo::FactoryAlgo::applyAlgoWithDetails(graph, algo);
+        //     // Output the MST details to the client.
+        //     ClientHandler::outputHandler("MST Details:\n" + details, fd);
+        // } catch (const std::invalid_argument& e) {
+        //     ClientHandler::outputHandler(e.what(), fd);
+        //     sleep(1);
+        // }
     } else if (cmd == "Newedge") {
         string input = ClientHandler::inputHandler("Add Edge:\n[format: v u w]\nYour Input: ", fd);
         stringstream inputStream(input);

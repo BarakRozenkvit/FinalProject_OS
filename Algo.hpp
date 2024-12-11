@@ -11,7 +11,7 @@ namespace MSTAlgo {
 
 Tree Boruvka(Graph& g);
 
-Tree Prim(Graph* g);
+Tree Prim(Graph& g);
 
 Tree Kruskal(Graph* g);
 
