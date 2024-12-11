@@ -23,7 +23,7 @@ public:
 
     int longestDistance();
 
-    double avarageDistance();
+    double averageDistance();
 
     int shortestDistance();
 

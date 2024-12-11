@@ -1,7 +1,8 @@
 #include "Algo.hpp"
-#include <algorithm> // for std::min
 
-Tree MSTAlgo::Prim(Graph* graph){
+#include <algorithm>  // for std::min
+
+Tree MSTAlgo::Prim(Graph* graph) {
     int v = graph->vertexNum();
     // vector to store the parent of vertex
     vector<int> parent(v);
@@ -14,8 +15,9 @@ Tree MSTAlgo::Prim(Graph* graph){
     vector<bool> vis(v);
 
     priority_queue<pair<int, int>,
-            vector<pair<int, int>>,
-            greater<pair<int, int>>> pq;
+                   vector<pair<int, int>>,
+                   greater<pair<int, int>>>
+        pq;
 
     // Initialize all key vector as INFINITE
     // and vis vector as false
@@ -40,15 +42,13 @@ Tree MSTAlgo::Prim(Graph* graph){
         pq.pop();
         vis[node] = true;
         for (int i = 0; i < v; i++) {
-
             // If the vertex is not visited
             // and the edge weight of neighbouring
             // vertex is less than key value of
             // neighbouring vertex then update it.
-            if (!vis[i] && graph->at(node,i) != 0
-                && graph->at(node,i) < key[i]) {
-                pq.push({graph->at(node,i), i});
-                key[i] = graph->at(node,i);
+            if (!vis[i] && graph->at(node, i) != 0 && graph->at(node, i) < key[i]) {
+                pq.push({graph->at(node, i), i});
+                key[i] = graph->at(node, i);
                 parent[i] = node;
             }
         }
@@ -59,19 +59,19 @@ Tree MSTAlgo::Prim(Graph* graph){
     // Print the edges and their
     // weights in the MST
     for (int i = 1; i < v; i++) {
-        tree.addEdge(parent[i],i,graph->at(i,parent[i]));
-        tree.addEdge(i,parent[i],graph->at(i,parent[i]));
+        tree.addEdge(parent[i], i, graph->at(i, parent[i]));
+        tree.addEdge(i, parent[i], graph->at(i, parent[i]));
     }
     return tree;
 }
 
-Tree MSTAlgo::Kruskal(Graph* graph){
+Tree MSTAlgo::Kruskal(Graph* graph) {
     int V = graph->vertexNum();
     vector<pair<int, pair<int, int>>> edges;
     for (int i = 0; i < V; i++) {
         for (int j = 0; j < V; j++) {
-            if (graph->at(i,j) != 0) {
-                edges.push_back({graph->at(i,j), {i, j}});
+            if (graph->at(i, j) != 0) {
+                edges.push_back({graph->at(i, j), {i, j}});
             }
         }
     }
@@ -98,15 +98,14 @@ Tree MSTAlgo::Kruskal(Graph* graph){
             y = parent[y];
         }
         if (x != y) {
-            tree.addEdge(u,v,w);
-            tree.addEdge(v,u,w);
+            tree.addEdge(u, v, w);
+            tree.addEdge(v, u, w);
             e++;
             parent[x] = y;
         }
     }
     return tree;
 }
-
 
 Graph DistanceAlgo::FloyedWarshall(Graph g) {
     /**
@@ -117,33 +116,35 @@ do for j ← 1 to n
 do dij(k) ← min (dij(k-1), dik(k-1) + dkj(k-1))
 6. return D(n)
      */
-     for(int k=0;k<g.vertexNum();k++){
-         for(int i=0;i<g.vertexNum();i++){
-             for(int j=0;j<g.vertexNum();j++){
-                 if (g.at(i,j) && g.at(i,k) + g.at(k,j)){
-                     g.addEdge(i, j, std::min(g.at(i, j), g.at(i, k) + g.at(k, j)));
-                 }
-             }
-         }
-     }
+    for (int k = 0; k < g.vertexNum(); k++) {
+        for (int i = 0; i < g.vertexNum(); i++) {
+            for (int j = 0; j < g.vertexNum(); j++) {
+                if (g.at(i, j) && g.at(i, k) + g.at(k, j)) {
+                    g.addEdge(i, j, std::min(g.at(i, j), g.at(i, k) + g.at(k, j)));
+                }
+            }
+        }
+    }
     return g;
 }
 
-Tree MSTAlgo::FactoryAlgo::applyAlgo(Graph* graph, std::string algoName) {
-    // Determine the algorithm to use
+std::pair<Tree, std::string> MSTAlgo::FactoryAlgo::applyAlgoWithDetails(Graph* graph, const std::string& algoName) {
+    Tree mst;
     if (algoName == "Prim") {
-        return Prim(graph);
+        mst = Prim(graph);
     } else if (algoName == "Kruskal") {
-        return Kruskal(graph); // Note: Kruskal accepts a reference to the graph
+        mst = Kruskal(graph);
     } else {
         throw std::invalid_argument("Unsupported algorithm: " + algoName);
     }
-    // An empty tree is returned if the algorithm is not supported
-    return Tree();
+
+    // Calculate distances and prepare details
+    mst.calculateDistances();
+    std::ostringstream details;
+    details << "Total Weight: " << mst.getTotalWeight() << "\n";
+    details << "Longest Distance: " << mst.longestDistance() << "\n";
+    details << "Shortest Distance: " << mst.shortestDistance() << "\n";
+    details << "Average Distance: " << mst.avarageDistance() << "\n";
+
+    return {mst, details.str()};
 }
-
-// int main () {
-
-//     MainGraph* graph = MainGraph::getInstance();
-//     return 0;
-// }

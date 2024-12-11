@@ -1,23 +1,27 @@
 #include "Graph.hpp"
+
 #include <vector>
 
 using namespace std;
 
 void Graph::newGraph(int n) {
-    _graph = vector<vector<int>>(n, vector<int>(n,0));
+    _graph = vector<vector<int>>(n, vector<int>(n, 0));
     _edgeCounter = 0;
 }
 
 void Graph::addEdge(int v, int u, int w) {
-    if (v >= vertexNum() || u >= vertexNum() || v < 0 || u < 0){
+    if (v >= vertexNum() || u >= vertexNum() || v < 0 || u < 0) {
         throw invalid_argument("index out of bounds!");
     }
-    if (w < 0){
+    if (w < 0) {
         throw invalid_argument("negative weight not allowed!");
     }
-    if (_graph[v][u] > 0 && w > 0){
+    if (!_graph[v][u] && w > 0) {
         _edgeCounter++;
+    } else if (_graph[v][u] > 0 && w == 0) {
+        _edgeCounter--;
     }
+
     _graph[v][u] = w;
     _graph[u][v] = w;
 }

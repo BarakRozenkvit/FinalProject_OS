@@ -1,35 +1,35 @@
-#include "Tree.hpp"
+#include <queue>
+#include <sstream>
+#include <string>
+
 #include "Graph.hpp"
 #include "MainGraph.hpp"
-#include <string>
-#include <queue>
+#include "Tree.hpp"
 #pragma once
 
-namespace MSTAlgo{
+namespace MSTAlgo {
 
-    Tree Boruvka(Graph& g);
+Tree Boruvka(Graph& g);
 
-    Tree Prim(Graph* g);
+Tree Prim(Graph* g);
 
-    Tree Kruskal(Graph* g);
+Tree Kruskal(Graph* g);
 
-    Tree Tarjan(Graph& g);
+Tree Tarjan(Graph& g);
 
-    Tree integerMST(Graph& g);
+Tree integerMST(Graph& g);
 
-    class FactoryAlgo{
+class FactoryAlgo {
+   public:
+    static std::pair<Tree, std::string> applyAlgoWithDetails(Graph* graph, const std::string& algoName);
+};
+}  // namespace MSTAlgo
 
-    public:
-        static Tree applyAlgo(Graph* algo, std::string algoName);
+namespace DistanceAlgo {
 
-    };
+Graph FloyedWarshall(Graph g);
 }
 
-namespace DistanceAlgo{
-
-    Graph FloyedWarshall(Graph g);
-}
-
-namespace Util{
+namespace Util {
 
 }

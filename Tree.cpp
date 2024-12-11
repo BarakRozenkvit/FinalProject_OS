@@ -57,12 +57,25 @@ int Tree::shortestDistance() {
 
 }
 
-double Tree::avarageDistance() {
-    int d=0;
-    for(int i=0;i<vertexNum();i++){
-        for(int j=0;j<i;j++){
-            d += at(i,j);
+double Tree::averageDistance() {
+    // Ensure shortest paths are calculated
+    if (!_calculated) {
+        calculateDistances(); // Run Floyd-Warshall to update _distances
+    }
+
+    double totalDistance = 0; // Total sum of distances
+    int count = 0;           // Count of unique pairs
+
+    // Iterate over all unique pairs (i < j)
+    for (int i = 0; i < vertexNum(); i++) {
+        for (int j = i + 1; j < vertexNum(); j++) {
+            if (_distances.at(i, j) != INT_MAX) { // Include valid shortest paths
+                totalDistance += _distances.at(i, j);
+                count++;
+            }
         }
     }
-    return (double)d/edgeNum();
+
+    // Compute and return average distance
+    return count > 0 ? (totalDistance / count) : 0;
 }
