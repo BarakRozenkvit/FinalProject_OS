@@ -2,9 +2,6 @@
 #include <algorithm> // for std::min
 
 Tree MSTAlgo::Prim(Graph* graph){
-    /***
-    Source: https://www.geeksforgeeks.org/prims-algorithm-in-cpp/
-     */
     int v = graph->vertexNum();
     // vector to store the parent of vertex
     vector<int> parent(v);
@@ -111,7 +108,7 @@ Tree MSTAlgo::Kruskal(Graph* graph){
 }
 
 
-Graph DistanceAlgo::FloyedMarshal(Graph g) {
+Graph DistanceAlgo::FloyedWarshall(Graph g) {
     /**
      * 1. D(0) ← W
 2. 3. 4. 5. for k ← 1 to n

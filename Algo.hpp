@@ -27,7 +27,7 @@ namespace MSTAlgo{
 
 namespace DistanceAlgo{
 
-    Graph FloyedMarshal(Graph g);
+    Graph FloyedWarshall(Graph g);
 }
 
 namespace Util{
