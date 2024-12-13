@@ -1,6 +1,6 @@
 #include "Pipeline.hpp"
 
-Pipeline::Pipeline(Graph (*mstAlgo) (Graph*)){
+Pipeline::Pipeline(Graph (*mstAlgo) (Graph)){
     _stage = new ActiveObject(mstAlgo,
                 new ActiveObject(GraphAlgo::getTotalWeight,
                 new ActiveObject(DistanceAlgo::FloyedWarshall,
@@ -23,8 +23,8 @@ void Pipeline::execute(){
     }
 };
 
-void Pipeline::addTask(Graph* graph){
-    cout << "Adding new graph to pipeline, Address: " << graph <<endl;
+void Pipeline::addTask(Graph graph){
+    cout << "Adding new graph to pipeline, Address: "<<endl;
     _stage->pushTask(graph);
 }
 

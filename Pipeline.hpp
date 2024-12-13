@@ -10,12 +10,12 @@ class Pipeline{
     ActiveObject* _stage;
     
 public:
-    Pipeline(Graph (*mstAlgo) (Graph*));
+    Pipeline(Graph (*mstAlgo) (Graph));
     ~Pipeline();
 
     void execute();
 
-    void addTask(Graph* graph);
+    void addTask(Graph graph);
 
     static void* runStage(void* stage);
 

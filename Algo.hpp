@@ -6,23 +6,23 @@
 
 namespace MSTAlgo {
 
-    Graph Prim(Graph* g);
+    Graph Prim(Graph g);
 
-    Graph Kruskal(Graph* g);
+    Graph Kruskal(Graph g);
 }
 
 namespace DistanceAlgo {
 
-    Graph FloyedWarshall(Graph* g);
+    Graph FloyedWarshall(Graph g);
 }
 
 namespace GraphAlgo {
     
-    Graph getTotalWeight(Graph* g);
+    Graph getTotalWeight(Graph g);
 
-    Graph longestDistance(Graph* g);
+    Graph longestDistance(Graph g);
 
-    Graph averageDistance(Graph* g);
+    Graph averageDistance(Graph g);
 
-    Graph shortestDistance(Graph* g);
+    Graph shortestDistance(Graph g);
 }

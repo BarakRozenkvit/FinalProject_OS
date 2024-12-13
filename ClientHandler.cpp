@@ -35,8 +35,8 @@ int ClientHandler::handleGraph(int fd) {
         string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
         // in Pipeline, gives a deep copy of graph for async calculation
         try{
-            Graph task = graph->getGraph();
-            FactoryPipeline::get(algo)->addTask(&task);
+            // Graph task = graph->getGraph();
+            FactoryPipeline::get(algo)->addTask(graph->getGraph());
         }
         catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
