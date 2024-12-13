@@ -2,8 +2,9 @@
 
 #include <algorithm>  // for std::min
 
-Tree MSTAlgo::Prim(Graph& graph) {
-    int v = graph.vertexNum();
+Graph MSTAlgo::Prim(Graph* graph) {
+    
+    int v = graph->vertexNum();
     // vector to store the parent of vertex
     vector<int> parent(v);
 
@@ -46,26 +47,26 @@ Tree MSTAlgo::Prim(Graph& graph) {
             // and the edge weight of neighbouring
             // vertex is less than key value of
             // neighbouring vertex then update it.
-            if (!vis[i] && graph.at(node, i) != 0 && graph.at(node, i) < key[i]) {
-                pq.push({graph.at(node, i), i});
-                key[i] = graph.at(node, i);
+            if (!vis[i] && graph->at(node, i) != 0 && graph->at(node, i) < key[i]) {
+                pq.push({graph->at(node, i), i});
+                key[i] = graph->at(node, i);
                 parent[i] = node;
             }
         }
     }
 
-    Tree tree;
-    tree.newGraph(graph.vertexNum());
+    Graph tree;
+    tree.newGraph(graph->vertexNum());
     // Print the edges and their
     // weights in the MST
     for (int i = 1; i < v; i++) {
-        tree.addEdge(parent[i], i, graph.at(i, parent[i]));
-        tree.addEdge(i, parent[i], graph.at(i, parent[i]));
+        tree.addEdge(parent[i], i, graph->at(i, parent[i]));
+        tree.addEdge(i, parent[i], graph->at(i, parent[i]));
     }
     return tree;
 }
 
-Tree MSTAlgo::Kruskal(Graph* graph) {
+Graph MSTAlgo::Kruskal(Graph* graph) {
     int V = graph->vertexNum();
     vector<pair<int, pair<int, int>>> edges;
     for (int i = 0; i < V; i++) {
@@ -77,7 +78,7 @@ Tree MSTAlgo::Kruskal(Graph* graph) {
     }
     sort(edges.begin(), edges.end());
 
-    Tree tree;
+    Graph tree;
     tree.newGraph(graph->vertexNum());
     int* parent = new int[V];
     for (int i = 0; i < V; i++) {
@@ -107,7 +108,7 @@ Tree MSTAlgo::Kruskal(Graph* graph) {
     return tree;
 }
 
-Graph DistanceAlgo::FloyedWarshall(Graph g) {
+Graph DistanceAlgo::FloyedWarshall(Graph* g) {
     /**
      * 1. D(0) ← W
 2. 3. 4. 5. for k ← 1 to n
@@ -116,35 +117,81 @@ do for j ← 1 to n
 do dij(k) ← min (dij(k-1), dik(k-1) + dkj(k-1))
 6. return D(n)
      */
-    for (int k = 0; k < g.vertexNum(); k++) {
-        for (int i = 0; i < g.vertexNum(); i++) {
-            for (int j = 0; j < g.vertexNum(); j++) {
-                if (g.at(i, j) && g.at(i, k) + g.at(k, j)) {
-                    g.addEdge(i, j, std::min(g.at(i, j), g.at(i, k) + g.at(k, j)));
+    for (int k = 0; k < g->vertexNum(); k++) {
+        for (int i = 0; i < g->vertexNum(); i++) {
+            for (int j = 0; j < g->vertexNum(); j++) {
+                if (g->at(i, j) && g->at(i, k) + g->at(k, j)) {
+                    g->addEdge(i, j, std::min(g->at(i, j), g->at(i, k) + g->at(k, j)));
                 }
             }
         }
     }
-    return g;
+    return *g;
 }
 
-std::pair<Tree, std::string> MSTAlgo::FactoryAlgo::applyAlgoWithDetails(Graph* graph, const std::string& algoName) {
-    Tree mst;
-    if (algoName == "Prim") {
-        mst = Prim(graph);
-    } else if (algoName == "Kruskal") {
-        mst = Kruskal(graph);
-    } else {
-        throw std::invalid_argument("Unsupported algorithm: " + algoName);
+Graph GraphAlgo::getTotalWeight(Graph* graph) {
+    int weight = 0;
+    for(int i=0;i<graph->vertexNum();i++){
+        for(int j=0;j<i;j++){
+            weight += graph->at(i,j);
+        }
+    }
+    return *graph;
+}
+
+Graph GraphAlgo::longestDistance(Graph* graph) {
+    int d=0;
+    for(int i=0;i<graph->vertexNum();i++){
+        for(int j=0;j<i;j++){
+            if (graph->at(i,j) > d){
+                d= graph->at(i,j);
+            }
+        }
+    }
+    return *graph;
+}
+
+Graph GraphAlgo::shortestDistance(Graph* graph) {
+    int d=INT_MAX;
+    for(int i=0;i<graph->vertexNum();i++){
+        for(int j=0;j<i;j++){
+            if (graph->at(i,j) > 0 && graph->at(i,j) < d){
+                d= graph->at(i,j);
+            }
+        }
+    }
+    return *graph;
+
+}
+
+Graph GraphAlgo::averageDistance(Graph* graph) {
+    double totalDistance = 0; // Total sum of distances
+    int count = 0;           // Count of unique pairs
+
+    // Iterate over all unique pairs (i < j)
+    for (int i = 0; i < graph->vertexNum(); i++) {
+        for (int j = i + 1; j < graph->vertexNum(); j++) {
+            if (graph->at(i, j) != INT_MAX) { // Include valid shortest paths
+                totalDistance += graph->at(i, j);
+                count++;
+            }
+        }
     }
 
-    // Calculate distances and prepare details
-    mst.calculateDistances();
-    std::ostringstream details;
-    details << "Total Weight: " << mst.getTotalWeight() << "\n";
-    details << "Longest Distance: " << mst.longestDistance() << "\n";
-    details << "Shortest Distance: " << mst.shortestDistance() << "\n";
-    details << "Average Distance: " << mst.averageDistance() << "\n";
-
-    return {mst, details.str()};
+    // Compute and return average distance
+    return *graph;
 }
+
+// int main(){
+
+//     Graph g;
+//     g.newGraph(5);
+//     g.addEdge(0,1,2);
+//     g.addEdge(1,4,3);
+
+//     Graph f = MSTAlgo::Prim(&g);
+//     int i=0;
+
+
+
+// }

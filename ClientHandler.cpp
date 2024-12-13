@@ -9,6 +9,7 @@ string CLEAR_TERMINAL = "\033[2J\033[H";
 int ClientHandler::handleGraph(int fd) {
     ClientHandler::outputHandler("Requesting Permission to Graph...\n", fd);
     MainGraph* graph = MainGraph::getInstance();
+    cout << "Main Graph Address: " << graph << endl;
     MainGraph::lockInstance();
     string cmd = ClientHandler::inputHandler(
                                                  "\nWrite a Command:"
@@ -30,34 +31,17 @@ int ClientHandler::handleGraph(int fd) {
             sleep(1);
         }
     }
-    // else if (cmd == "MST") {
-    //     string algo = ClientHandler::inputHandler(CLEAR_TERMINAL + "Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
-    //     try {
-    //         MSTAlgo::FactoryAlgo::applyAlgo(graph, algo);
-    //     }
-    //     catch (const invalid_argument& e){
-    //         ClientHandler::outputHandler(CLEAR_TERMINAL + e.what(),fd);
-    //         sleep(1);
-    //     }
-    // }
     else if (cmd == "MST") {
         string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
         // in Pipeline, gives a deep copy of graph for async calculation
-        if (algo == "Prim"){
-            PipelinePrim.enque_taks(graph);
+        try{
+            Graph task = graph->getGraph();
+            FactoryPipeline::get(algo)->addTask(&task);
         }
-        else if(algo == "Kruskal"){
-            PipelineKruskal.enqueue_taks(graph);
+        catch (const std::invalid_argument& e) {
+            ClientHandler::outputHandler(e.what(), fd);
+            sleep(1);
         }
-        
-        // try {
-        //     auto [mst, details] = MSTAlgo::FactoryAlgo::applyAlgoWithDetails(graph, algo);
-        //     // Output the MST details to the client.
-        //     ClientHandler::outputHandler("MST Details:\n" + details, fd);
-        // } catch (const std::invalid_argument& e) {
-        //     ClientHandler::outputHandler(e.what(), fd);
-        //     sleep(1);
-        // }
     } else if (cmd == "Newedge") {
         string input = ClientHandler::inputHandler("Add Edge:\n[format: v u w]\nYour Input: ", fd);
         stringstream inputStream(input);

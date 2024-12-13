@@ -3,26 +3,20 @@
 #include <condition_variable>
 #include <pthread.h>
 #include "Graph.hpp"
-#include "Tree.hpp"
-#include "Algo.hpp"
+#pragma once
 
 using namespace std;
 
-template <typename Incoming, typename Outgoing>
 class ActiveObject{
-protected:
-    queue<Incoming> _tasks;
+    queue<Graph*> _tasks;
     pthread_mutex_t _mutex;
     pthread_cond_t _cond;
-    Outgoing(*_process)(Incoming)
-    void* _next;
+    Graph (*_process)(Graph*);
+    ActiveObject* _next;
 
 public:
-    ActiveObject(Outgoing(*process)(Incoming),void* next);
+    ActiveObject(Graph (*process)(Graph*),ActiveObject* next);
     void run();
-    void getTask(Incoming task);
-    void forwardTask(Outgoing task);
-    void* nextStage(){
-        return _next;
-    }
+    void pushTask(Graph* task);
+    ActiveObject* getNext();
 };

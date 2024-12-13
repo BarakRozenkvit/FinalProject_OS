@@ -13,23 +13,26 @@ add_executable(FinalProject_OS
         MainGraph.hpp
         Algo.cpp
         Algo.hpp
-        Tree.cpp
-        Tree.hpp
         ClientHandler.cpp
         ClientHandler.hpp
         Proactor.cpp
         Proactor.hpp
         Reactor.cpp
         Reactor.hpp
+        ActiveObject.hpp
+        ActiveObject.cpp
+        Pipeline.hpp
+        Pipeline.cpp
+        Singletone.hpp
         )
 
-add_executable(Kruskal
- Algo.hpp
-        Algo.cpp
-        Tree.hpp
-        Tree.cpp
-        MainGraph.hpp
-        MainGraph.cpp
-        Graph.hpp
-        Graph.cpp
-)
+# add_executable(Kruskal
+#  Algo.hpp
+#         Algo.cpp
+#         Tree.hpp
+#         Tree.cpp
+#         MainGraph.hpp
+#         MainGraph.cpp
+#         Graph.hpp
+#         Graph.cpp
+# )

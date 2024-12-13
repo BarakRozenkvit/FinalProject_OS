@@ -13,7 +13,7 @@
 #include <pthread.h>
 #include <vector>
 #include "Proactor.hpp"
-#include "Algo.hpp"
+#include "Pipeline.hpp"
 #include "MainGraph.hpp"
 #pragma once
 

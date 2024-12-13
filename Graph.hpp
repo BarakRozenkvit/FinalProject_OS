@@ -26,8 +26,7 @@ public:
 
     int at(int v, int u);
 
-    const vector<vector<int>>& getGraph() const{
-        return _graph;
+    Graph getGraph() const{
+        return *this;
     }
-
 };
