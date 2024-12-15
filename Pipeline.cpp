@@ -5,7 +5,6 @@ pthread_cond_t condWorker = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutexWorker = PTHREAD_MUTEX_INITIALIZER;
 
 Pipeline::Pipeline(pair<int,Graph> (*mstAlgo) (int,Graph)){    
-    cout << "Starting new Pipeline" << endl;
     _stage = new ActiveObject(mstAlgo,
                 new ActiveObject(GraphAlgo::getTotalWeight,
                 new ActiveObject(DistanceAlgo::FloyedWarshall,
@@ -17,7 +16,6 @@ Pipeline::Pipeline(pair<int,Graph> (*mstAlgo) (int,Graph)){
 }
 
 Pipeline::~Pipeline(){
-    cout << "Destorying Pipeline" << endl;
     ActiveObject* current = _stage;
     while(current!=nullptr){
         ActiveObject* temp = current;
@@ -40,7 +38,6 @@ void Pipeline::execute(){
 };
 
 void Pipeline::addTask(int fd, Graph graph){
-    cout << "Adding new graph to pipeline, request from: " << fd <<endl;
     _stage->pushTask(make_pair(fd, graph));
 }
 
@@ -53,7 +50,6 @@ void* Pipeline::runStage(void* stage){
 void Pipeline::killWorkers() {
     pthread_mutex_lock(&mutexWorker);
     for (auto id : workers) {
-        cout << id.second << endl;
         pthread_kill(id.first, 0);
         proactorArgsPipeline* data = static_cast<proactorArgsPipeline*>(id.second);
         free(data);

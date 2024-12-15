@@ -27,7 +27,6 @@ pair<pthread_t,void*> startProactorClient(int sockfd, proactorClient threadFunc)
     data->func = threadFunc;
     data->sockfd = sockfd;
     data->pause = false;
-    cout << "Starting proactor fd: " << data->sockfd << endl;
     int ret = pthread_create(&thread, nullptr, proactorWrapperClient, data);
     if (ret != 0) {
         perror("pthread_create");
@@ -47,7 +46,6 @@ pair<pthread_t,void*> startProactorPipeline(void* stage, proactorPipeline thread
 
     data->func = threadFunc;
     data->stage = stage;
-    cout << "Starting stage: " << data->stage << endl;
     int ret = pthread_create(&thread, nullptr, proactorWrapperPipeline, data);
     if (ret != 0) {
         perror("pthread_create");

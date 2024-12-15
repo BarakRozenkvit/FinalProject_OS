@@ -28,10 +28,6 @@ public:
 
     static void* runStage(void* stage);
 
-    void getNext(){
-        cout << _stage << endl;
-    }
-
     static void killWorkers();
 };
 
