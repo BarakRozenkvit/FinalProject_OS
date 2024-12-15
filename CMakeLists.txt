@@ -9,8 +9,6 @@ add_executable(FinalProject_OS
         Graph.cpp
         Graph.hpp
         Server.cpp
-        MainGraph.cpp
-        MainGraph.hpp
         Algo.cpp
         Algo.hpp
         ClientHandler.cpp

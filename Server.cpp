@@ -1,4 +1,3 @@
-#include "MainGraph.hpp"
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -9,6 +8,7 @@
 #include <thread>
 #include "Reactor.hpp"
 #include "ClientHandler.hpp"
+#include "Graph.hpp"
 
 int get_listener_socket()
 {
@@ -65,7 +65,7 @@ void signalHandler(int signal){
 int main()
 {
 
-    MainGraph *graph = MainGraph::getInstance();
+    Graph* graph = MainGraph::getInstance();
 
     signal(SIGINT, signalHandler);
     signal(SIGKILL, signalHandler);

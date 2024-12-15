@@ -1,5 +1,4 @@
 #include <pthread.h>
-#include "Graph.hpp"
 #pragma once
 
 template <typename T>
@@ -24,8 +23,10 @@ public:
 
     static void destroyInstance(){
         pthread_mutex_lock(&Singletone::mutex);
-        delete Singletone::instance;
-        Singletone::instance = nullptr;
+        if (Singletone::instance){
+            delete Singletone::instance;
+            Singletone::instance = nullptr;
+        }
         pthread_mutex_unlock(&Singletone::mutex); 
     }
 

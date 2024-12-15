@@ -22,6 +22,7 @@ void Graph::addEdge(int v, int u, int w) {
         _edgeCounter--;
     }
 
+    // Graph is undirected
     _graph[v][u] = w;
     _graph[u][v] = w;
 }
@@ -47,4 +48,8 @@ int Graph::at(int v, int u) {
 Graph::Graph(Graph const &g) {
     _graph = g._graph;
     _edgeCounter = g._edgeCounter;
+}
+
+Graph Graph::getGraph() const{
+    return *this;
 }

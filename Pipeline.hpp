@@ -2,8 +2,9 @@
 #include <pthread.h>
 #include "ActiveObject.hpp"
 #include "Algo.hpp"
-#include "Singletone.hpp"
+#include "Graph.hpp"
 #include "Proactor.hpp"
+
 #pragma once
 
 using namespace std;
@@ -11,6 +12,7 @@ using namespace std;
 extern std::vector<std::pair<pthread_t,void*>> workers; // Declaration
 extern pthread_cond_t condWorker;
 extern pthread_mutex_t mutexWorker;
+
 
 class Pipeline{
 
@@ -33,26 +35,24 @@ public:
     static void killWorkers();
 };
 
+
 class PipelinePrim: public Pipeline{
 
 public:
     PipelinePrim(): Pipeline(MSTAlgo::Prim){};
-    ~PipelinePrim() override {
-        cout << "Destroying Pipeline Prim" << endl;
-    };
+    ~PipelinePrim() override {};
 };
+
 
 class PipelineKruskal: public Pipeline{
 
 public:
     PipelineKruskal(): Pipeline(MSTAlgo::Kruskal){};
-    ~PipelineKruskal() override {
-        cout << "Destroying Pipeline Kruskal" << endl;
-    };
+    ~PipelineKruskal() override {};
 };
 
-class FactoryPipeline{
 
+class FactoryPipeline{
 public:
     static Pipeline* get(string algo){
         if (algo=="Prim"){

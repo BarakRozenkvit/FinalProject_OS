@@ -53,9 +53,9 @@ void* Pipeline::runStage(void* stage){
 void Pipeline::killWorkers() {
     pthread_mutex_lock(&mutexWorker);
     for (auto id : workers) {
+        cout << id.second << endl;
         pthread_kill(id.first, 0);
         proactorArgsPipeline* data = static_cast<proactorArgsPipeline*>(id.second);
-        free(data->stage);
         free(data);
     }
     pthread_mutex_unlock(&mutexWorker);

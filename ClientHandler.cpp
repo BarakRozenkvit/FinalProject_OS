@@ -7,9 +7,10 @@ pthread_mutex_t mutexHandler = PTHREAD_MUTEX_INITIALIZER;
 string CLEAR_TERMINAL = "\033[2J\033[H";
 
 int ClientHandler::handleGraph(int fd) {
-    ClientHandler::inputHandler("Press Any Key to Permission to Graph...\n", fd);
     ClientHandler::outputHandler("Requesting Permission to Graph...\n", fd);
-    MainGraph* graph = MainGraph::getInstance();
+    // get instance of main graph
+    Graph* graph = MainGraph::getInstance();
+    // lock the main graph
     MainGraph::lockInstance();
     string cmd = ClientHandler::inputHandler(
                                                  "\nWrite a Command:"
@@ -21,6 +22,8 @@ int ClientHandler::handleGraph(int fd) {
                                                  "\nYour Input: ",
                                              fd);
     int exit = 0;
+    
+    // get number and create new graph
     if (cmd == "Newgraph") {
         string number = ClientHandler::inputHandler("Choose graph size\nYour Input: ", fd);
         try {
@@ -31,20 +34,30 @@ int ClientHandler::handleGraph(int fd) {
             sleep(1);
         }
     }
+    
+    // get algo type and show results
     else if (cmd == "MST") {        
         string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
-        // in Pipeline, gives a deep copy of graph for async calculation
         try{
-            ClientHandler::outputHandler("Results: ", fd);
+            if (!graph->vertexNum()){
+                throw invalid_argument("Cant Calculate on Empty Graph!\n");
+            }
+
+            ClientHandler::outputHandler("Results:\n", fd); 
+            // call factory pipeline, give fd of client and deep copy of graph
             FactoryPipeline::get(algo)->addTask(fd, graph->getGraph());
+            // unlock the graph
             MainGraph::unlockInstance();
             sleep(2);
+            ClientHandler::inputHandler("Press Any Key to Continue...\n", fd);
             return !exit;
         }
         catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
         }
+
+    // get edge paramters and add to graph
     } else if (cmd == "Newedge") {
         string input = ClientHandler::inputHandler("Add Edge:\n[format: v u w]\nYour Input: ", fd);
         stringstream inputStream(input);
@@ -61,6 +74,8 @@ int ClientHandler::handleGraph(int fd) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
         }
+
+    // get edge parameters and remove from graph
     } else if (cmd == "Removeedge") {
         string input = ClientHandler::inputHandler("Remove Edge:\n[format: v u]\nYour Input: ", fd);
         stringstream inputStream(input);
@@ -75,12 +90,17 @@ int ClientHandler::handleGraph(int fd) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
         }
+    
+    // if exit set flag
     } else if (cmd == "Exit") {
         exit = 1;
+    
+    // if unknown command
     } else {
         ClientHandler::outputHandler("Unknown command!", fd);
         sleep(1);
     }
+    // unlock main graph
     MainGraph::unlockInstance();
     return !exit;
 }
