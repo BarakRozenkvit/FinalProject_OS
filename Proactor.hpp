@@ -30,7 +30,6 @@ typedef struct {
 typedef struct {
     proactorPipeline func;
     void* stage;
-    bool pause;
 } proactorArgsPipeline;
 
 // Wrapper function.

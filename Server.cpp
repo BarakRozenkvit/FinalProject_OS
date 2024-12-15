@@ -52,18 +52,25 @@ int get_listener_socket()
     return listeningSocket;
 }
 
+void signalHandler(int signal){
+    if (signal == SIGINT || signal == SIGINT){
+        std::cout << "shutting down gracefully..." << std::endl;
+        ClientHandler::killHandlers();
+        Pipeline::killWorkers();
+        MainGraph::destroyInstance();
+        exit(0);
+    }
+}
+
 int main()
 {
 
     MainGraph *graph = MainGraph::getInstance();
 
-    signal(SIGINT, ClientHandler::killHandlers);
-    signal(SIGKILL, ClientHandler::killHandlers);
-    signal(SIGINT, Pipeline::killWorkers);
-    signal(SIGKILL, Pipeline::killWorkers);
+    signal(SIGINT, signalHandler);
+    signal(SIGKILL, signalHandler);
 
     ClientHandler::startMonitorHandlers();
-    Pipeline::startMonitorWorkers();
 
     int listener = get_listener_socket();
     if (listener == -1)
@@ -79,7 +86,7 @@ int main()
         int poll_count = poll(reactor->pfds, reactor->fd_count, -1);
         if (poll_count == -1){
             if (errno == EINTR){
-                ClientHandler::killHandlers(SIGINT);
+                signalHandler(SIGINT);
             }
             perror("poll");
         }

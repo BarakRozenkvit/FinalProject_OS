@@ -13,7 +13,6 @@ void* proactorWrapperClient(void* arg) {
 void* proactorWrapperPipeline(void* arg) {
     proactorArgsPipeline* data = static_cast<proactorArgsPipeline*>(arg);
     void* result = data->func(data->stage);
-    data-> pause = true;
     return result;
 }
 
@@ -48,7 +47,6 @@ pair<pthread_t,void*> startProactorPipeline(void* stage, proactorPipeline thread
 
     data->func = threadFunc;
     data->stage = stage;
-    data->pause = false;
     cout << "Starting stage: " << data->stage << endl;
     int ret = pthread_create(&thread, nullptr, proactorWrapperPipeline, data);
     if (ret != 0) {

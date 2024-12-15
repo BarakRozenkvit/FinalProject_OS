@@ -3,7 +3,7 @@
 #include <algorithm>  // for std::min
 
 pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
-    cout << "Starting Prim" << endl;
+    cout << fd << "Started Prim" << endl;
     int v = graph.vertexNum();
     // vector to store the parent of vertex
     vector<int> parent(v);
@@ -64,12 +64,11 @@ pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
         tree.addEdge(i, parent[i], graph.at(i, parent[i]));
     }
 
-    Util::outputHandler("Finished Prim",fd);
+    Util::outputHandler("Finished Prim\n",fd);
     return make_pair(fd,tree);
 }
 
 pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
-    cout << "Starting Kruskal" << endl;
     int V = graph.vertexNum();
     vector<pair<int, pair<int, int>>> edges;
     for (int i = 0; i < V; i++) {
@@ -108,7 +107,7 @@ pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
             parent[x] = y;
         }
     }
-    Util::outputHandler("Finished Kruskal",fd);
+    Util::outputHandler("Finished Kruskal\n",fd);
     return make_pair(fd,tree);
 }
 
@@ -121,7 +120,6 @@ do for j ← 1 to n
 do dij(k) ← min (dij(k-1), dik(k-1) + dkj(k-1))
 6. return D(n)
      */
-    cout << "Starting Floyed" << endl;
     for (int k = 0; k < g.vertexNum(); k++) {
         for (int i = 0; i < g.vertexNum(); i++) {
             for (int j = 0; j < g.vertexNum(); j++) {
@@ -132,7 +130,7 @@ do dij(k) ← min (dij(k-1), dik(k-1) + dkj(k-1))
         }
     }
     
-    Util::outputHandler("Finished Floyed",fd);
+    Util::outputHandler("Finished Floyed\n",fd);
     return make_pair(fd,g);
 }
 
@@ -156,7 +154,7 @@ pair<int,Graph> GraphAlgo::longestDistance(int fd, Graph graph) {
             }
         }
     }
-    Util::outputHandler("longestDistance: " + to_string(d),fd);
+    Util::outputHandler("longestDistance: " + to_string(d) +"\n",fd);
     return make_pair(fd,graph);
 }
 
@@ -169,7 +167,7 @@ pair<int,Graph> GraphAlgo::shortestDistance(int fd, Graph graph) {
             }
         }
     }
-    Util::outputHandler("shortestDistance: " + to_string(d),fd);
+    Util::outputHandler("shortestDistance: " + to_string(d) + "\n",fd);
     return make_pair(fd,graph);
 
 }
@@ -187,7 +185,7 @@ pair<int,Graph> GraphAlgo::averageDistance(int fd, Graph graph) {
             }
         }
     }
-    Util::outputHandler("avargerDistance: " + to_string(totalDistance/count) ,fd);
+    Util::outputHandler("avargerDistance: " + to_string(totalDistance/count) +"\n" ,fd);
     return make_pair(fd,graph);
 }
 

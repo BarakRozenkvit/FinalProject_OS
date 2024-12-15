@@ -5,6 +5,7 @@ pthread_cond_t condWorker = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutexWorker = PTHREAD_MUTEX_INITIALIZER;
 
 Pipeline::Pipeline(pair<int,Graph> (*mstAlgo) (int,Graph)){    
+    cout << "Starting new Pipeline" << endl;
     _stage = new ActiveObject(mstAlgo,
                 new ActiveObject(GraphAlgo::getTotalWeight,
                 new ActiveObject(DistanceAlgo::FloyedWarshall,
@@ -14,6 +15,17 @@ Pipeline::Pipeline(pair<int,Graph> (*mstAlgo) (int,Graph)){
                 nullptr))))));
     execute();
 }
+
+Pipeline::~Pipeline(){
+    cout << "Destorying Pipeline" << endl;
+    ActiveObject* current = _stage;
+    while(current!=nullptr){
+        ActiveObject* temp = current;
+        current = current->getNext();
+        delete temp; 
+    }    
+}
+
 
 void Pipeline::execute(){
     pthread_t thread;
@@ -35,41 +47,18 @@ void Pipeline::addTask(int fd, Graph graph){
 void* Pipeline::runStage(void* stage){
     ActiveObject* thisStage = static_cast<ActiveObject*>(stage);
     thisStage->run();
+    return nullptr;
 }
 
-void* Pipeline::monitorWorkers(void*) {
-    while (1) {
-        pthread_cond_wait(&condWorker, &mutexWorker);
-        for (auto it = workers.begin(); it != workers.end();) {
-            proactorArgsPipeline* data = static_cast<proactorArgsPipeline*>((*it).second);
-            if (data->pause) {
-                stopProactorPipeline((*it).first, data);
-                workers.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
-}
-
-void Pipeline::startMonitorWorkers() {
-    pair<pthread_t, void*> id = startProactorPipeline(nullptr, Pipeline::monitorWorkers);
+void Pipeline::killWorkers() {
     pthread_mutex_lock(&mutexWorker);
-    workers.push_back(id);
-    pthread_mutex_unlock(&mutexWorker);
-}
-
-void Pipeline::killWorkers(int signal) {
-    if (signal == SIGINT || signal == SIGKILL) {
-        std::cout << "shutting down gracefully..." << std::endl;
-        pthread_mutex_lock(&mutexWorker);
-        for (auto id : workers) {
-            pthread_kill(id.first, 0);
-            proactorArgsPipeline* data = static_cast<proactorArgsPipeline*>(id.second);
-            free(data->stage);
-            free(data);
-        }
-        pthread_mutex_unlock(&mutexWorker);
-        exit(0);
+    for (auto id : workers) {
+        pthread_kill(id.first, 0);
+        proactorArgsPipeline* data = static_cast<proactorArgsPipeline*>(id.second);
+        free(data->stage);
+        free(data);
     }
+    pthread_mutex_unlock(&mutexWorker);
+    Singletone<PipelinePrim>::destroyInstance();
+    Singletone<PipelineKruskal>::destroyInstance();
 }

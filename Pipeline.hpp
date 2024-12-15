@@ -18,7 +18,7 @@ class Pipeline{
     
 public:
     Pipeline(pair<int,Graph> (*mstAlgo) (int, Graph));
-    ~Pipeline();
+    virtual ~Pipeline();
 
     void execute();
 
@@ -30,25 +30,25 @@ public:
         cout << _stage << endl;
     }
 
-    static void* monitorWorkers(void*);
-
-    static void startMonitorWorkers();
-
-    static void killWorkers(int signal);
+    static void killWorkers();
 };
 
 class PipelinePrim: public Pipeline{
 
 public:
     PipelinePrim(): Pipeline(MSTAlgo::Prim){};
-    ~PipelinePrim() = default;
+    ~PipelinePrim() override {
+        cout << "Destroying Pipeline Prim" << endl;
+    };
 };
 
 class PipelineKruskal: public Pipeline{
 
 public:
     PipelineKruskal(): Pipeline(MSTAlgo::Kruskal){};
-    ~PipelineKruskal() = default;
+    ~PipelineKruskal() override {
+        cout << "Destroying Pipeline Kruskal" << endl;
+    };
 };
 
 class FactoryPipeline{

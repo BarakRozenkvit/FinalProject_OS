@@ -7,9 +7,9 @@ pthread_mutex_t mutexHandler = PTHREAD_MUTEX_INITIALIZER;
 string CLEAR_TERMINAL = "\033[2J\033[H";
 
 int ClientHandler::handleGraph(int fd) {
+    ClientHandler::inputHandler("Press Any Key to Permission to Graph...\n", fd);
     ClientHandler::outputHandler("Requesting Permission to Graph...\n", fd);
     MainGraph* graph = MainGraph::getInstance();
-    cout << "Main Graph Address: " << graph << endl;
     MainGraph::lockInstance();
     string cmd = ClientHandler::inputHandler(
                                                  "\nWrite a Command:"
@@ -31,11 +31,15 @@ int ClientHandler::handleGraph(int fd) {
             sleep(1);
         }
     }
-    else if (cmd == "MST") {        string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
+    else if (cmd == "MST") {        
+        string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
         // in Pipeline, gives a deep copy of graph for async calculation
         try{
-            // Graph task = graph->getGraph();
+            ClientHandler::outputHandler("Results: ", fd);
             FactoryPipeline::get(algo)->addTask(fd, graph->getGraph());
+            MainGraph::unlockInstance();
+            sleep(2);
+            return !exit;
         }
         catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
@@ -162,17 +166,13 @@ void ClientHandler::startMonitorHandlers() {
     pthread_mutex_unlock(&mutexHandler);
 }
 
-void ClientHandler::killHandlers(int signal) {
-    if (signal == SIGINT || signal == SIGKILL) {
-        std::cout << "shutting down gracefully..." << std::endl;
-        pthread_mutex_lock(&mutexHandler);
-        for (auto id : handlers) {
-            pthread_kill(id.first, 0);
-            proactorArgsClient* data = static_cast<proactorArgsClient*>(id.second);
-            close(data->sockfd);
-            free(data);
-        }
-        pthread_mutex_unlock(&mutexHandler);
-        exit(0);
+void ClientHandler::killHandlers() {
+    pthread_mutex_lock(&mutexHandler);
+    for (auto id : handlers) {
+        pthread_kill(id.first, 0);
+        proactorArgsClient* data = static_cast<proactorArgsClient*>(id.second);
+        close(data->sockfd);
+        free(data);
     }
+    pthread_mutex_unlock(&mutexHandler);
 }

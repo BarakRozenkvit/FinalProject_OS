@@ -39,5 +39,5 @@ namespace ClientHandler{
 
     void startMonitorHandlers();
 
-    void killHandlers(int signal);
+    void killHandlers();
 }
