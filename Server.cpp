@@ -59,8 +59,11 @@ int main()
 
     signal(SIGINT, ClientHandler::killHandlers);
     signal(SIGKILL, ClientHandler::killHandlers);
+    signal(SIGINT, Pipeline::killWorkers);
+    signal(SIGKILL, Pipeline::killWorkers);
 
     ClientHandler::startMonitorHandlers();
+    Pipeline::startMonitorWorkers();
 
     int listener = get_listener_socket();
     if (listener == -1)

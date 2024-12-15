@@ -31,12 +31,11 @@ int ClientHandler::handleGraph(int fd) {
             sleep(1);
         }
     }
-    else if (cmd == "MST") {
-        string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
+    else if (cmd == "MST") {        string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
         // in Pipeline, gives a deep copy of graph for async calculation
         try{
             // Graph task = graph->getGraph();
-            FactoryPipeline::get(algo)->addTask(graph->getGraph());
+            FactoryPipeline::get(algo)->addTask(fd, graph->getGraph());
         }
         catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
@@ -92,7 +91,7 @@ void* ClientHandler::handleConnection(int fd) {
         perror("accept");
         return new int(-1);
     }
-    pair<pthread_t, void*> id = startProactor(client_fd, ClientHandler::handleClient);
+    pair<pthread_t, void*> id = startProactorClient(client_fd, ClientHandler::handleClient);
     pthread_mutex_lock(&mutexHandler);
     handlers.push_back(id);
     pthread_mutex_unlock(&mutexHandler);
@@ -145,9 +144,9 @@ void* ClientHandler::monitorHandlers(int) {
     while (1) {
         pthread_cond_wait(&condHandler, &mutexHandler);
         for (auto it = handlers.begin(); it != handlers.end();) {
-            proactorArgs* data = static_cast<proactorArgs*>((*it).second);
+            proactorArgsClient* data = static_cast<proactorArgsClient*>((*it).second);
             if (data->pause) {
-                stopProactor((*it).first, data);
+                stopProactorClient((*it).first, data);
                 handlers.erase(it);
             } else {
                 ++it;
@@ -157,7 +156,7 @@ void* ClientHandler::monitorHandlers(int) {
 }
 
 void ClientHandler::startMonitorHandlers() {
-    pair<pthread_t, void*> id = startProactor(0, ClientHandler::monitorHandlers);
+    pair<pthread_t, void*> id = startProactorClient(0, ClientHandler::monitorHandlers);
     pthread_mutex_lock(&mutexHandler);
     handlers.push_back(id);
     pthread_mutex_unlock(&mutexHandler);
@@ -169,7 +168,7 @@ void ClientHandler::killHandlers(int signal) {
         pthread_mutex_lock(&mutexHandler);
         for (auto id : handlers) {
             pthread_kill(id.first, 0);
-            proactorArgs* data = static_cast<proactorArgs*>(id.second);
+            proactorArgsClient* data = static_cast<proactorArgsClient*>(id.second);
             close(data->sockfd);
             free(data);
         }

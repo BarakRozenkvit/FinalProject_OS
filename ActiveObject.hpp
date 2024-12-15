@@ -8,15 +8,15 @@
 using namespace std;
 
 class ActiveObject{
-    queue<Graph> _tasks;
+    queue<pair<int,Graph>> _tasks;
     pthread_mutex_t _mutex;
     pthread_cond_t _cond;
-    Graph (*_process)(Graph);
+    pair<int,Graph> (*_process)(int,Graph);
     ActiveObject* _next;
 
 public:
-    ActiveObject(Graph (*process)(Graph),ActiveObject* next);
+    ActiveObject(pair<int,Graph> (*process)(int,Graph),ActiveObject* next);
     void run();
-    void pushTask(Graph task);
+    void pushTask(pair<int,Graph> task);
     ActiveObject* getNext();
 };

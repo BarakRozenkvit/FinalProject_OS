@@ -1,8 +1,8 @@
 #include "ActiveObject.hpp"
 #include <unistd.h>
 
-ActiveObject::ActiveObject(Graph (*process)(Graph),ActiveObject* next){
-    _tasks = queue<Graph>();
+ActiveObject::ActiveObject(pair<int,Graph> (*process)(int,Graph),ActiveObject* next){
+    _tasks = queue<pair<int,Graph>>();
     _cond = PTHREAD_COND_INITIALIZER;
     _mutex = PTHREAD_MUTEX_INITIALIZER;
     _process = process;
@@ -14,17 +14,17 @@ void ActiveObject::run(){
     while (_tasks.empty()) {
         pthread_cond_wait(&_cond, &_mutex); // Wait for the queue to have an item
     }
-    Graph task = _tasks.front();
+    pair<int,Graph> task = _tasks.front();
     _tasks.pop();
-    sleep(10);
-    Graph result = _process(task);
+    sleep(2);
+    pair<int,Graph> result = _process(task.first,task.second);
     pthread_mutex_unlock(&_mutex);
     if(_next){
         _next->pushTask(result);
     }
 }
 
-void ActiveObject::pushTask(Graph task){
+void ActiveObject::pushTask(pair<int,Graph> task){
     pthread_mutex_lock(&_mutex);
     _tasks.push(task);
     pthread_mutex_unlock(&_mutex);

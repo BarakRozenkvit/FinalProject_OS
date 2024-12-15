@@ -16,20 +16,34 @@
 
 using namespace std;
 
-typedef void * (* proactorFunc) (int sockfd);
+typedef void * (* proactorClient) (int sockfd);
+
+typedef void* (* proactorPipeline) (void* stage);
 
 // Struct to hold the original function and its argument
 typedef struct {
-    proactorFunc func;
+    proactorClient func;
     int sockfd;
     bool pause;
-} proactorArgs;
+} proactorArgsClient;
+
+typedef struct {
+    proactorPipeline func;
+    void* stage;
+    bool pause;
+} proactorArgsPipeline;
 
 // Wrapper function.
-void* proactorWrapper(void* arg) ;
+void* proactorWrapperClient(void* arg);
+
+void* proactorWrapperPipeline(void* arg);
 
 // starts new proactor and returns proactor thread id.
-pair<pthread_t,void*> startProactor(int sockfd, proactorFunc threadFunc);
+pair<pthread_t,void*> startProactorClient(int sockfd, proactorClient threadFunc);
+
+pair<pthread_t,void*> startProactorPipeline(void* stage, proactorPipeline threadFunc);
 
 // stops proactor by threadid
-int stopProactor(pthread_t tid,proactorArgs* args) ;
+int stopProactorClient(pthread_t tid,proactorArgsClient* args);
+
+int stopProactorPipeline(pthread_t tid,proactorArgsPipeline* args);
