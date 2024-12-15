@@ -203,10 +203,9 @@ void ClientHandler::killHandlers() {
     pthread_mutex_lock(&mutexHandler);
     for (auto id : handlers) {
         // for every thread in list stop the handlers
-        pthread_kill(id.first, 0);
         proactorArgsClient* data = static_cast<proactorArgsClient*>(id.second);
         close(data->sockfd);
-        free(data);
+        stopProactorClient(id.first,data);
     }
     pthread_mutex_unlock(&mutexHandler);
 }

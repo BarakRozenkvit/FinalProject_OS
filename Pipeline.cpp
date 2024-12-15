@@ -55,9 +55,8 @@ void Pipeline::killWorkers() {
     pthread_mutex_lock(&mutexWorker);
     for (auto id : workers) {
         // kill all threads and release allocated data
-        pthread_kill(id.first, 0);
         proactorArgsPipeline* data = static_cast<proactorArgsPipeline*>(id.second);
-        free(data);
+        stopProactorPipeline(id.first,data);
     }
     pthread_mutex_unlock(&mutexWorker);
     // destroy pipelines
