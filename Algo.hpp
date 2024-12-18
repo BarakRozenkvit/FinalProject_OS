@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sstream>
 #include <string>
+#include <climits>
 #include "Graph.hpp"
 #pragma once
 
@@ -25,7 +26,7 @@ namespace DistanceAlgo {
     /*
      * Source:  
      */
-    pair<int,Graph> FloyedWarshall(int fd, Graph g);
+    pair<int,Graph> FloydWarshall(int fd, Graph g);
 }
 
 namespace GraphAlgo {

@@ -11,76 +11,75 @@ string CLEAR_TERMINAL = "\033[2J\033[H";
 
 int ClientHandler::handleGraph(int fd) {
     ClientHandler::outputHandler("Requesting Permission to Graph...\n", fd);
-    // get instance of main graph
-    Graph* graph = MainGraph::getInstance();
-    // lock the main graph
-    MainGraph::lockInstance();
+
     string cmd = ClientHandler::inputHandler(
-                                                 "\nWrite a Command:"
-                                                 "\n- Newgraph [to create new graph]"
-                                                 "\n- MST (calculate mst to graph)"
-                                                 "\n- Newedge (add edge)"
-                                                 "\n- Removeedge (remove edge)"
-                                                 "\n- Exit"
-                                                 "\nYour Input: ",
-                                             fd);
+        "\nWrite a Command:"
+        "\n- Newgraph [to create new graph]"
+        "\n- MST (calculate mst to graph)"
+        "\n- Newedge (add edge)"
+        "\n- Removeedge (remove edge)"
+        "\n- Exit"
+        "\nYour Input: ",
+        fd);
     int exit = 0;
-    
+
     // get number and create new graph
-    if (cmd == "Newgraph") {
+    if (cmd == "ng" || cmd == "Newgraph") {
         string number = ClientHandler::inputHandler("Choose graph size\nYour Input: ", fd);
         try {
             int size = stoi(number);
-            graph->newGraph(size);
+            // graph->newGraph(size);
+            Graph::users_graphs[fd].newGraph(size);
+            
         } catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler("Number not provided!", fd);
             sleep(1);
         }
     }
-    
+
     // get algo type and show results
-    else if (cmd == "MST") {        
+    else if (cmd == "MST") {
         string process = ClientHandler::inputHandler(
             "Input wanted work process:\nLF or P?\nYour Input: ", fd);
-        
+
         if (process != "LF" && process != "P") {
             ClientHandler::outputHandler("Invalid work process! Use LF or P\n", fd);
             sleep(1);
-            MainGraph::unlockInstance();
+
             return !exit;
         }
 
         string algo = ClientHandler::inputHandler(
             "Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
-        
+
         try {
-            if (!graph->vertexNum()) {
+        //  if (!graph->vertexNum()) {
+            if (!Graph::users_graphs[fd].vertexNum()) {
                 throw invalid_argument("Cant Calculate on Empty Graph!\n");
             }
 
-            ClientHandler::outputHandler("Results:\n", fd); 
-            
+            ClientHandler::outputHandler("Results:\n", fd);
+
             if (process == "P") {
                 // Pipeline implementation
-                FactoryPipeline::get(algo)->addTask(fd, graph->getGraph());
-            } 
-            else {  // LF - Leader-Follower
+                FactoryPipeline::get(algo)->addTask(fd, Graph::users_graphs[fd]);
+            //  FactoryPipeline::get(algo)->addTask(fd, graph->getGraph());
+            } else {  // LF - Leader-Follower
                 LeaderFollower* lf = LeaderFollowerFactory::get(algo);
-                lf->addTask(fd, graph->getGraph());
+                lf->addTask(fd, Graph::users_graphs[fd]);
+             // lf->addTask(fd, graph->getGraph());
             }
 
-            MainGraph::unlockInstance();
-            sleep(2);
+            sleep(1);
             ClientHandler::inputHandler("Press Any Key to Continue...\n", fd);
             return !exit;
-        }
-        catch (const std::invalid_argument& e) {
+        } catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
         }
 
-    // get edge paramters and add to graph
-    } else if (cmd == "Newedge") {
+        // get edge paramters and add to graph
+    } else if (cmd == "ne" || cmd == "Newedge") {
         string input = ClientHandler::inputHandler("Add Edge:\n[format: v u w]\nYour Input: ", fd);
         stringstream inputStream(input);
         string vstr, ustr, wstr;
@@ -91,14 +90,15 @@ int ClientHandler::handleGraph(int fd) {
             int v = stoi(vstr);
             int u = stoi(ustr);
             int w = stoi(wstr);
-            graph->addEdge(v, u, w);
+            Graph::users_graphs[fd].addEdge(v, u, w);
+          //graph->addEdge(v, u, w);
         } catch (const invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
         }
 
-    // get edge parameters and remove from graph
-    } else if (cmd == "Removeedge") {
+        // get edge parameters and remove from graph
+    } else if (cmd == "re" || cmd == "Removeedge") {
         string input = ClientHandler::inputHandler("Remove Edge:\n[format: v u]\nYour Input: ", fd);
         stringstream inputStream(input);
         string vstr, ustr;
@@ -107,23 +107,23 @@ int ClientHandler::handleGraph(int fd) {
         try {
             int v = stoi(vstr);
             int u = stoi(ustr);
-            graph->removeEdge(v, u);
+            Graph::users_graphs[fd].removeEdge(v, u);
+         // graph->removeEdge(v, u);
         } catch (const invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
         }
-    
-    // if exit set flag
+
+        // if exit set flag
     } else if (cmd == "Exit") {
         exit = 1;
-    
-    // if unknown command
+
+        // if unknown command
     } else {
         ClientHandler::outputHandler("Unknown command!", fd);
         sleep(1);
     }
-    // unlock main graph
-    MainGraph::unlockInstance();
+
     return !exit;
 }
 
@@ -158,10 +158,12 @@ string ClientHandler::inputHandler(string message, int fd) {
     char buffer[256] = {'\0'};
     size_t receiveBytes = recv(fd, buffer, sizeof(buffer), 0);
     if (receiveBytes == 0) {
+        Graph::users_graphs.erase(fd);
         close(fd);
         return "Exit";
     }
     if (receiveBytes < 0) {
+        Graph::users_graphs.erase(fd);
         perror("recv");
         return "Exit";
     }
@@ -169,6 +171,7 @@ string ClientHandler::inputHandler(string message, int fd) {
     buffer[receiveBytes - 1] = '\0';
     string input(buffer);
     if (input == "Exit") {
+        Graph::users_graphs.erase(fd);
         close(fd);
     }
 
@@ -224,7 +227,7 @@ void ClientHandler::killHandlers() {
         // for every thread in list stop the handlers
         proactorArgsClient* data = static_cast<proactorArgsClient*>(id.second);
         close(data->sockfd);
-        stopProactorClient(id.first,data);
+        stopProactorClient(id.first, data);
     }
     pthread_mutex_unlock(&mutexHandler);
 }

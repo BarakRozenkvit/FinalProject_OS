@@ -53,11 +53,10 @@ int get_listener_socket()
 }
 
 void signalHandler(int signal){
-    if (signal == SIGINT || signal == SIGINT){
+    if (signal == SIGINT || signal == SIGKILL){
         std::cout << "shutting down gracefully..." << std::endl;
         ClientHandler::killHandlers();
         Pipeline::killWorkers();
-        MainGraph::destroyInstance();
         exit(0);
     }
 }
@@ -65,7 +64,6 @@ void signalHandler(int signal){
 int main()
 {
 
-    Graph* graph = MainGraph::getInstance();
 
     signal(SIGINT, signalHandler);
     signal(SIGKILL, signalHandler);

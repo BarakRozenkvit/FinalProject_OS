@@ -24,7 +24,6 @@ void ActiveObject::run(){
         // get new task and pop queue
         pair<int,Graph> task = _tasks.front();
         _tasks.pop();
-        sleep(0.5);
         // get result from process
         pair<int,Graph> result = _process(task.first,task.second);
         // if next active object push task to its queue

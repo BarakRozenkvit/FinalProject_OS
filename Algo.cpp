@@ -57,7 +57,7 @@ pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
 
     Graph tree;
     tree.newGraph(graph.vertexNum());
-    // Print the edges and their
+    // Print the _edges and their
     // weights in the MST
     for (int i = 1; i < v; i++) {
         tree.addEdge(parent[i], i, graph.at(i, parent[i]));
@@ -70,15 +70,15 @@ pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
 
 pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
     int V = graph.vertexNum();
-    vector<pair<int, pair<int, int>>> edges;
+    vector<pair<int, pair<int, int>>> _edges;
     for (int i = 0; i < V; i++) {
         for (int j = 0; j < V; j++) {
             if (graph.at(i, j) != 0) {
-                edges.push_back({graph.at(i, j), {i, j}});
+                _edges.push_back({graph.at(i, j), {i, j}});
             }
         }
     }
-    sort(edges.begin(), edges.end());
+    sort(_edges.begin(), _edges.end());
 
     Graph tree;
     tree.newGraph(graph.vertexNum());
@@ -87,10 +87,10 @@ pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
         parent[i] = i;
     }
     int i = 0, e = 0;
-    while (e < V - 1 && i < edges.size()) {
-        int w = edges[i].first;
-        int u = edges[i].second.first;
-        int v = edges[i].second.second;
+    while (e < V - 1 && i < _edges.size()) {
+        int w = _edges[i].first;
+        int u = _edges[i].second.first;
+        int v = _edges[i].second.second;
         i++;
         int x = u;
         int y = v;
@@ -112,7 +112,7 @@ pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
     return make_pair(fd,tree);
 }
 
-pair<int,Graph> DistanceAlgo::FloyedWarshall(int fd, Graph g) {
+pair<int,Graph> DistanceAlgo::FloydWarshall(int fd, Graph g) {
     /**
     *   1. D(0) ← W
         2. for k ← 1 to n
@@ -131,7 +131,7 @@ pair<int,Graph> DistanceAlgo::FloyedWarshall(int fd, Graph g) {
         }
     }
     // send the fd the result
-    Util::outputHandler("Finished Floyed\n",fd);
+    Util::outputHandler("\nFinished Floyd Warshall\n",fd);
     return make_pair(fd,g);
 }
 
@@ -190,7 +190,7 @@ pair<int,Graph> GraphAlgo::averageDistance(int fd, Graph graph) {
         }
     }
     // send the fd the result
-    Util::outputHandler("avargerDistance: " + to_string(totalDistance/count) +"\n" ,fd);
+    Util::outputHandler("\naverageDistance: " + to_string(totalDistance/count) +"\n" ,fd);
     return make_pair(fd,graph);
 }
 

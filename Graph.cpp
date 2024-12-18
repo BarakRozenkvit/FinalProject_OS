@@ -1,8 +1,9 @@
 #include "Graph.hpp"
-
 #include <vector>
 
 using namespace std;
+
+map<int,Graph> Graph::users_graphs = map<int,Graph>();
 
 void Graph::newGraph(int n) {
     _graph = vector<vector<int>>(n, vector<int>(n, 0));

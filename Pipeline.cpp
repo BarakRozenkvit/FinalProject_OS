@@ -8,7 +8,7 @@ Pipeline::Pipeline(pair<int,Graph> (*mstAlgo) (int,Graph)){
     // create the pipeline list of workers 
     _stage = new ActiveObject(mstAlgo,
                 new ActiveObject(GraphAlgo::getTotalWeight,
-                new ActiveObject(DistanceAlgo::FloyedWarshall,
+                new ActiveObject(DistanceAlgo::FloydWarshall,
                 new ActiveObject(GraphAlgo::averageDistance,
                 new ActiveObject(GraphAlgo::longestDistance,
                 new ActiveObject(GraphAlgo::shortestDistance,

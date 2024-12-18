@@ -14,6 +14,7 @@
 #include <vector>
 #include "Proactor.hpp"
 #include "Pipeline.hpp"
+#include "LeaderFollower.hpp"
 #include "Graph.hpp"
 #pragma once
 

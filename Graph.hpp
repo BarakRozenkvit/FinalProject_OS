@@ -1,11 +1,13 @@
 #include <vector>
 #include <iostream>
+#include <map>
 #include "Singletone.hpp"
 #pragma once
 
 using namespace std;
 
 class Graph{
+
     /*
      * Graph class of undirected graph
      */
@@ -13,6 +15,12 @@ class Graph{
     int _edgeCounter;
 
 public:
+
+    /*
+     * Map of users and their graphs
+     */
+    static map<int,Graph> users_graphs;
+
     Graph() =default;
     
     /*
@@ -23,7 +31,7 @@ public:
     ~Graph() = default;
 
     /*
-     * Create New Graph and set edges counter to zero
+     * Create New Graph and set _edges counter to zero
      */
     void newGraph(int n);
 
@@ -57,6 +65,3 @@ public:
      */
     Graph getGraph() const;
 };
-
-using MainGraph = Singletone<Graph>;
-
