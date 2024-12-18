@@ -21,6 +21,8 @@ add_executable(FinalProject_OS
         ActiveObject.cpp
         Pipeline.hpp
         Pipeline.cpp
+        LeaderFollower.cpp
+        LeaderFollower.hpp
         Singletone.hpp
         )
 

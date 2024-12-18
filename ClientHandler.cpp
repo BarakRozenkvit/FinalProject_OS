@@ -40,16 +40,35 @@ int ClientHandler::handleGraph(int fd) {
     
     // get algo type and show results
     else if (cmd == "MST") {        
-        string algo = ClientHandler::inputHandler("Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
-        try{
-            if (!graph->vertexNum()){
+        string process = ClientHandler::inputHandler(
+            "Input wanted work process:\nLF or P?\nYour Input: ", fd);
+        
+        if (process != "LF" && process != "P") {
+            ClientHandler::outputHandler("Invalid work process! Use LF or P\n", fd);
+            sleep(1);
+            MainGraph::unlockInstance();
+            return !exit;
+        }
+
+        string algo = ClientHandler::inputHandler(
+            "Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
+        
+        try {
+            if (!graph->vertexNum()) {
                 throw invalid_argument("Cant Calculate on Empty Graph!\n");
             }
 
             ClientHandler::outputHandler("Results:\n", fd); 
-            // call factory pipeline, give fd of client and deep copy of graph
-            FactoryPipeline::get(algo)->addTask(fd, graph->getGraph());
-            // unlock the graph
+            
+            if (process == "P") {
+                // Pipeline implementation
+                FactoryPipeline::get(algo)->addTask(fd, graph->getGraph());
+            } 
+            else {  // LF - Leader-Follower
+                LeaderFollower* lf = LeaderFollowerFactory::get(algo);
+                lf->addTask(fd, graph->getGraph());
+            }
+
             MainGraph::unlockInstance();
             sleep(2);
             ClientHandler::inputHandler("Press Any Key to Continue...\n", fd);
