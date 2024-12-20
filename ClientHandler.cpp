@@ -199,6 +199,7 @@ void ClientHandler::outputHandler(string message, int fd) {
 void* ClientHandler::monitorHandlers(int) {
     while (1) {
         // wait for thread is finished
+
         pthread_cond_wait(&condHandler, &mutexHandler);
         for (auto it = handlers.begin(); it != handlers.end();) {
             proactorArgsClient* data = static_cast<proactorArgsClient*>((*it).second);

@@ -1,6 +1,6 @@
 #include "Pipeline.hpp"
 
-std::vector<std::pair<pthread_t, void*>> workers;
+std::vector<pthread_t> workers;
 pthread_cond_t condWorker = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutexWorker = PTHREAD_MUTEX_INITIALIZER;
 
@@ -33,9 +33,13 @@ void Pipeline::execute(){
     ActiveObject* current = _stage;
     while(current!=nullptr){
         // create thread and add to list
-        pair<pthread_t, void*> id = startProactorPipeline(current ,Pipeline::runStage);
+        pthread_t thread;
+        int ret = pthread_create(&thread, nullptr, Pipeline::runStage, current);
+        if (ret != 0) {
+            perror("pthread_create");
+        }
         pthread_mutex_lock(&mutexWorker);
-        workers.push_back(id);
+        workers.push_back(thread);
         pthread_mutex_unlock(&mutexWorker);        
         current = current->getNext();
     }
@@ -55,8 +59,7 @@ void Pipeline::killWorkers() {
     pthread_mutex_lock(&mutexWorker);
     for (auto id : workers) {
         // kill all threads and release allocated data
-        proactorArgsPipeline* data = static_cast<proactorArgsPipeline*>(id.second);
-        stopProactorPipeline(id.first,data);
+        pthread_kill(id,0);
     }
     pthread_mutex_unlock(&mutexWorker);
     // destroy pipelines

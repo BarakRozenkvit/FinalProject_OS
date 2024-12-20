@@ -3,14 +3,13 @@
 #include "ActiveObject.hpp"
 #include "Algo.hpp"
 #include "Graph.hpp"
-#include "Proactor.hpp"
 
 #pragma once
 
 using namespace std;
 
 // list to hold all pipeline threads id and args
-extern std::vector<std::pair<pthread_t,void*>> workers; // Declaration
+extern std::vector<pthread_t> workers; // Declaration
 // cond if worker is finished
 extern pthread_cond_t condWorker;
 // mutex to add worker to list

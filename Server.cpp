@@ -6,9 +6,19 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+#include <iostream>
+#include <filesystem>
+#include <string>
+#include <unistd.h>
+#include <iostream>
+#include <vector>
+#include <pthread.h>
+
+#include <mach/mach.h>
 #include "Reactor.hpp"
 #include "ClientHandler.hpp"
 #include "Graph.hpp"
+namespace fs = std::filesystem;
 
 int get_listener_socket()
 {
@@ -52,11 +62,41 @@ int get_listener_socket()
     return listeningSocket;
 }
 
+void listThreads() {
+    // Get the current task
+    mach_port_t task;
+    task_for_pid(mach_task_self(), getpid(), &task);
+
+    // Get thread list
+    thread_act_array_t threadList;
+    mach_msg_type_number_t threadCount;
+
+    kern_return_t kr = task_threads(task, &threadList, &threadCount);
+    if (kr != KERN_SUCCESS) {
+        std::cerr << "Error: Unable to get thread list. Error code: " << kr << std::endl;
+        return;
+    }
+
+    std::cout << "Total threads: " << threadCount << std::endl;
+    for (mach_msg_type_number_t i = 0; i < threadCount; ++i) {
+        std::cout << "Thread ID: " << threadList[i] << std::endl;
+    }
+
+    // Deallocate thread list
+    vm_deallocate(mach_task_self(), reinterpret_cast<vm_address_t>(threadList), threadCount * sizeof(thread_act_t));
+}
+
 void signalHandler(int signal){
     if (signal == SIGINT || signal == SIGKILL){
         std::cout << "shutting down gracefully..." << std::endl;
         ClientHandler::killHandlers();
         Pipeline::killWorkers();
+
+        pid_t pid = getpid(); // Get the current process ID
+        std::cout << "Process ID: " << pid << std::endl;
+
+        std::cout << "Threads in this process:" << std::endl;
+        listThreads();        
         exit(0);
     }
 }
