@@ -8,17 +8,19 @@
 
 using namespace std;
 
-// list to hold all pipeline threads id and args
-extern std::vector<pthread_t> workers; // Declaration
-// cond if worker is finished
-extern pthread_cond_t condWorker;
-// mutex to add worker to list
-extern pthread_mutex_t mutexWorker;
 
 
 class Pipeline{
+    // list to hold all pipeline threads id and args
+    std::vector<pthread_t> workers; // Declaration
+    // cond if worker is finished
+    pthread_cond_t condWorker;
+    // mutex to add worker to list
+    pthread_mutex_t mutexWorker;
     // head of active objects list
     ActiveObject* _stage;
+    bool _isRunning;                          
+
     
 public:
     // constructor pipeline, gets a mst algo function
@@ -27,12 +29,14 @@ public:
     virtual ~Pipeline();
     // create threads of pipeline
     void execute();
+
+    void stop();
     // add Task to head of active objects
     void addTask(int fd, Graph graph);
     // function that runs in thread
     static void* runStage(void* stage);
     // kill all workers from thread list
-    static void killWorkers();
+    static void destroyAll();
 };
 
 // create Prim and Kruskal Pipelines inherit from Pipeline

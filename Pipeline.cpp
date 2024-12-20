@@ -1,10 +1,11 @@
 #include "Pipeline.hpp"
 
-std::vector<pthread_t> workers;
-pthread_cond_t condWorker = PTHREAD_COND_INITIALIZER;
-pthread_mutex_t mutexWorker = PTHREAD_MUTEX_INITIALIZER;
 
 Pipeline::Pipeline(pair<int,Graph> (*mstAlgo) (int,Graph)){   
+    _isRunning = true;
+    pthread_mutex_init(&mutexWorker, nullptr);
+    pthread_cond_init(&condWorker, nullptr);
+    std::vector<pthread_t> workers;
     // create the pipeline list of workers 
     _stage = new ActiveObject(mstAlgo,
                 new ActiveObject(GraphAlgo::getTotalWeight,
@@ -20,6 +21,7 @@ Pipeline::Pipeline(pair<int,Graph> (*mstAlgo) (int,Graph)){
 Pipeline::~Pipeline(){
     // destroy all allocated active objects
     ActiveObject* current = _stage;
+    stop();
     while(current!=nullptr){
         ActiveObject* temp = current;
         current = current->getNext();
@@ -55,13 +57,20 @@ void* Pipeline::runStage(void* stage){
     return nullptr;
 }
 
-void Pipeline::killWorkers() {
+
+void Pipeline::stop(){
+    _isRunning = false;
     pthread_mutex_lock(&mutexWorker);
-    for (auto id : workers) {
-        // kill all threads and release allocated data
-        pthread_kill(id,0);
+    for (pthread_t thread : workers) {  // Wait for all threads to finish
+        pthread_join(thread, nullptr);
     }
+    workers.clear();
     pthread_mutex_unlock(&mutexWorker);
+}
+
+void Pipeline::destroyAll() {
+    // pthread_mutex_lock(&mutexWorker);
+    // pthread_mutex_unlock(&mutexWorker);
     // destroy pipelines
     Singletone<PipelinePrim>::destroyInstance();
     Singletone<PipelineKruskal>::destroyInstance();

@@ -38,6 +38,8 @@ class LeaderFollower {
     // Log status for inpecting threads and task queue.
     void logStatus();
 
+    static void destroyAll();
+
    private:
     // Static function for thread execution
     static void* workerThread(void* arg);
@@ -45,13 +47,24 @@ class LeaderFollower {
     void processNextTask();
 };
 
+
+
+class LeaderFollowerPrim : public LeaderFollower {
+   public:
+    LeaderFollowerPrim(int threadCount = 5, int _queueLimit = 10) : LeaderFollower(MSTAlgo::Prim, threadCount, _queueLimit) {}
+};
+
+class LeaderFollowerKruskal : public LeaderFollower {
+    public :
+     LeaderFollowerKruskal(int threadCount = 5, int _queueLimit = 10) : LeaderFollower(MSTAlgo::Kruskal, threadCount, _queueLimit) {}
+};
+
+
 /**
  * Factory class for creating and managing LeaderFollower instances
  * Uses singleton pattern to maintain one instance per algorithm type
  */
 class LeaderFollowerFactory {
-    static LeaderFollower* primLF;     // Singleton instance for Prim's algorithm
-    static LeaderFollower* kruskalLF;  // Singleton instance for Kruskal's algorithm
 
    public:
     /**
@@ -62,28 +75,18 @@ class LeaderFollowerFactory {
      */
     static LeaderFollower* get(string algo) {
         if (algo == "Prim") {
-            if (!primLF) {
-                primLF = new LeaderFollower(MSTAlgo::Prim);
-                primLF->start();
-            }
-            return primLF;
+            LeaderFollowerPrim* LFP = Singletone<LeaderFollowerPrim>::getInstance();
+            LFP->start();
+            return LFP;
         }
 
         else if (algo == "Kruskal") {
-            if (!kruskalLF) {
-                kruskalLF = new LeaderFollower(MSTAlgo::Kruskal);
-                kruskalLF->start();
+                LeaderFollowerKruskal* LFK = Singletone<LeaderFollowerKruskal>::getInstance();
+                LFK->start();
+                return LFK;
             }
-            return kruskalLF;
-        }
-        throw invalid_argument("Algorithm not supported!");
+        throw std::invalid_argument("Invalid algorithm");
+        return nullptr;
     }
 
-    // Cleanup function to destroy all instances
-    static void destroyAll() {
-        delete primLF;
-        delete kruskalLF;
-        primLF = nullptr;
-        kruskalLF = nullptr;
-    }
 };

@@ -13,11 +13,10 @@
 #include <iostream>
 #include <vector>
 #include <pthread.h>
-
-#include <mach/mach.h>
 #include "Reactor.hpp"
 #include "ClientHandler.hpp"
 #include "Graph.hpp"
+#include "LeaderFollower.hpp"
 namespace fs = std::filesystem;
 
 int get_listener_socket()
@@ -75,14 +74,14 @@ void listThreads(pid_t pid) {
 }
 
 void signalHandler(int signal){
-    if (signal == SIGINT || signal == SIGKILL){
+    if (signal == SIGINT){
         std::cout << "shutting down gracefully..." << std::endl;
         ClientHandler::killHandlers();
-        Pipeline::killWorkers();
-
+        Pipeline::destroyAll();
+        LeaderFollower::destroyAll();
+        
         pid_t pid = getpid(); // Get the current process ID
         std::cout << "Process ID: " << pid << std::endl;
-
         std::cout << "Threads in this process:" << std::endl;
         listThreads(pid);        
         exit(0);
@@ -94,7 +93,6 @@ int main()
 
 
     signal(SIGINT, signalHandler);
-    signal(SIGKILL, signalHandler);
 
     ClientHandler::startMonitorHandlers();
 

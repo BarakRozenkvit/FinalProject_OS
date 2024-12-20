@@ -2,9 +2,6 @@
 #include <unistd.h>
 #include <iostream>
 
-// Initialize static factory members
-LeaderFollower* LeaderFollowerFactory::primLF = nullptr;
-LeaderFollower* LeaderFollowerFactory::kruskalLF = nullptr;
 
 /**
  * Constructor initializes thread pool resources
@@ -45,6 +42,12 @@ void LeaderFollower::start() {
         _threads.push_back(thread);
     }
 }
+
+void LeaderFollower::destroyAll() {
+    Singletone<LeaderFollowerPrim>::destroyInstance();
+    Singletone<LeaderFollowerKruskal>::destroyInstance();
+}
+
 
 /**
  * Stop the thread pool
