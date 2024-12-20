@@ -23,12 +23,14 @@ using namespace std;
 extern std::vector<std::pair<pthread_t,void*>> handlers; // Declaration
 extern pthread_cond_t condHandler;
 extern pthread_mutex_t mutexHandler;
+extern bool _isRunning;
+extern pthread_t _monitor;
 
 namespace ClientHandler{
     /*
      * Function that gets fd client and handle the graph requests 
      */
-    int handleGraph(int fd);
+    bool handleGraph(int fd);
 
     /*
     * Function the gets fd client had while handling graph is true keep going
@@ -53,7 +55,7 @@ namespace ClientHandler{
     /*
     * function to monitor all the handlers threads and if one is down, kill it so it wont be zombie and free data
     */
-    void* monitorHandlers(int);
+    void* monitorHandlers(void*);
 
     /*
     * function to start thread of monitor handlers

@@ -2,8 +2,10 @@
 
 #include <algorithm> 
 
-pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
+int sleep_time = 2;
 
+pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
+    sleep(sleep_time);
     int v = graph.vertexNum();
     // vector to store the parent of vertex
     vector<int> parent(v);
@@ -69,6 +71,7 @@ pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
 }
 
 pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
+    sleep(sleep_time);
     int V = graph.vertexNum();
     vector<pair<int, pair<int, int>>> _edges;
     for (int i = 0; i < V; i++) {
@@ -113,6 +116,7 @@ pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
 }
 
 pair<int,Graph> DistanceAlgo::FloydWarshall(int fd, Graph g) {
+    sleep(sleep_time);
     /**
     *   1. D(0) ← W
         2. for k ← 1 to n
@@ -136,6 +140,7 @@ pair<int,Graph> DistanceAlgo::FloydWarshall(int fd, Graph g) {
 }
 
 pair<int,Graph> GraphAlgo::getTotalWeight(int fd, Graph graph) {
+    sleep(sleep_time);
     int weight = 0;
     for(int i=0;i<graph.vertexNum();i++){
         for(int j=0;j<i;j++){
@@ -148,6 +153,7 @@ pair<int,Graph> GraphAlgo::getTotalWeight(int fd, Graph graph) {
 }
 
 pair<int,Graph> GraphAlgo::longestDistance(int fd, Graph graph) {
+    sleep(sleep_time);
     int d=0;
     for(int i=0;i<graph.vertexNum();i++){
         for(int j=0;j<i;j++){
@@ -162,6 +168,7 @@ pair<int,Graph> GraphAlgo::longestDistance(int fd, Graph graph) {
 }
 
 pair<int,Graph> GraphAlgo::shortestDistance(int fd, Graph graph) {
+    sleep(sleep_time);
     int d=INT_MAX;
     for(int i=0;i<graph.vertexNum();i++){
         for(int j=0;j<i;j++){
@@ -177,6 +184,7 @@ pair<int,Graph> GraphAlgo::shortestDistance(int fd, Graph graph) {
 }
 
 pair<int,Graph> GraphAlgo::averageDistance(int fd, Graph graph) {
+    sleep(sleep_time);
     double totalDistance = 0; // Total sum of distances
     int count = 0;           // Count of unique pairs
 

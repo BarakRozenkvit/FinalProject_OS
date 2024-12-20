@@ -73,17 +73,47 @@ void listThreads(pid_t pid) {
     }
 }
 
+void listThreads() {
+    #include <mach/mach.h>
+
+    // Get the current task
+    mach_port_t task;
+    task_for_pid(mach_task_self(), getpid(), &task);
+
+    // Get thread list
+    thread_act_array_t threadList;
+    mach_msg_type_number_t threadCount;
+
+    kern_return_t kr = task_threads(task, &threadList, &threadCount);
+    if (kr != KERN_SUCCESS) {
+        std::cerr << "Error: Unable to get thread list. Error code: " << kr << std::endl;
+        return;
+    }
+
+    std::cout << "Total threads: " << threadCount << std::endl;
+    for (mach_msg_type_number_t i = 0; i < threadCount; ++i) {
+        std::cout << "Thread ID: " << threadList[i] << std::endl;
+    }
+
+    // Deallocate thread list
+    vm_deallocate(mach_task_self(), reinterpret_cast<vm_address_t>(threadList), threadCount * sizeof(thread_act_t));
+}
+
 void signalHandler(int signal){
     if (signal == SIGINT){
         std::cout << "shutting down gracefully..." << std::endl;
+        cout << "Stopping Client Handlers" << endl;
         ClientHandler::killHandlers();
+        cout << "Stopping Pipeline" << endl;
         Pipeline::destroyAll();
+        cout << "Stopping LeaderFollower" << endl;
         LeaderFollower::destroyAll();
         
         pid_t pid = getpid(); // Get the current process ID
         std::cout << "Process ID: " << pid << std::endl;
         std::cout << "Threads in this process:" << std::endl;
-        listThreads(pid);        
+        listThreads(pid);
+        // listThreads();
         exit(0);
     }
 }
@@ -91,17 +121,16 @@ void signalHandler(int signal){
 int main()
 {
 
-
     signal(SIGINT, signalHandler);
-
-    ClientHandler::startMonitorHandlers();
-
+    
     int listener = get_listener_socket();
     if (listener == -1)
     {
         perror("socket");
         exit(1);
     }
+
+    ClientHandler::startMonitorHandlers();
 
     Reactor *reactor = startReactor();
     addFdToReactor(reactor, listener, ClientHandler::handleConnection);

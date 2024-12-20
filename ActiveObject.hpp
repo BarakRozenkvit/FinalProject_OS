@@ -19,10 +19,14 @@ class ActiveObject{
     pair<int,Graph> (*_process)(int,Graph);
     // next active object to push tasks
     ActiveObject* _next;
+    // 
+    bool _isRunning;
 
 public:
     // Active object gets a function that he runs and the next active object
     ActiveObject(pair<int,Graph> (*process)(int,Graph),ActiveObject* next);
+    // destory active object
+    ~ActiveObject();
     // run function that is inside thread
     void run();
     // push task to next active object

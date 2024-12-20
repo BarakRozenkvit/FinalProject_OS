@@ -31,7 +31,9 @@ pair<pthread_t,void*> startProactorClient(int sockfd, proactorClient threadFunc)
 }
 
 int stopProactorClient(pthread_t tid,proactorArgsClient* args){
-    pthread_kill(tid,0);
+    shutdown(args->sockfd,SHUT_RDWR);
+    close(args->sockfd);
     free(args);
+    pthread_join(tid, nullptr);
     return 0;
 }

@@ -8,8 +8,6 @@
 
 using namespace std;
 
-
-
 class Pipeline{
     // list to hold all pipeline threads id and args
     std::vector<pthread_t> workers; // Declaration
@@ -19,6 +17,7 @@ class Pipeline{
     pthread_mutex_t mutexWorker;
     // head of active objects list
     ActiveObject* _stage;
+    
     bool _isRunning;                          
 
     

@@ -19,14 +19,13 @@ Pipeline::Pipeline(pair<int,Graph> (*mstAlgo) (int,Graph)){
 }
 
 Pipeline::~Pipeline(){
-    // destroy all allocated active objects
     ActiveObject* current = _stage;
-    stop();
     while(current!=nullptr){
         ActiveObject* temp = current;
         current = current->getNext();
         delete temp; 
-    }    
+    }
+    stop();    
 }
 
 
@@ -59,7 +58,6 @@ void* Pipeline::runStage(void* stage){
 
 
 void Pipeline::stop(){
-    _isRunning = false;
     pthread_mutex_lock(&mutexWorker);
     for (pthread_t thread : workers) {  // Wait for all threads to finish
         pthread_join(thread, nullptr);
@@ -69,9 +67,6 @@ void Pipeline::stop(){
 }
 
 void Pipeline::destroyAll() {
-    // pthread_mutex_lock(&mutexWorker);
-    // pthread_mutex_unlock(&mutexWorker);
-    // destroy pipelines
     Singletone<PipelinePrim>::destroyInstance();
     Singletone<PipelineKruskal>::destroyInstance();
 }

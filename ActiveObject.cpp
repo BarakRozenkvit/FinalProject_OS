@@ -7,10 +7,16 @@ ActiveObject::ActiveObject(pair<int,Graph> (*process)(int,Graph),ActiveObject* n
     _mutex = PTHREAD_MUTEX_INITIALIZER;
     _process = process;
     _next = next;
+    _isRunning = true;
+}
+
+ActiveObject::~ActiveObject(){
+    _isRunning = false;
+    pthread_cond_signal(&_cond);
 }
 
 void ActiveObject::run(){
-    while(1){
+    while(_isRunning){
         // lock the mutex to know if the queue is empty
         pthread_mutex_lock(&_mutex);
         bool tasksEmpty = _tasks.empty();
@@ -19,8 +25,10 @@ void ActiveObject::run(){
         if (tasksEmpty){
             // if queue is empty wait for cond that new task cames
             pthread_cond_wait(&_cond, &_mutex);
+            if (!_isRunning){
+                return;
+            }
         }
-        
         // get new task and pop queue
         pair<int,Graph> task = _tasks.front();
         _tasks.pop();
