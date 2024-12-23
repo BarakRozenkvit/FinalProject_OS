@@ -127,7 +127,7 @@ int main()
                 {
                     void *fds = reactor->f2f[i].func(hot_fd);
                     int res = *(int *)fds;
-                    free(fds);
+                    delete static_cast<int *>(fds);
                     if (res == -1)
                     {
                         continue;
