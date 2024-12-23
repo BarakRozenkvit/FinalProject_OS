@@ -36,9 +36,12 @@ Reactor* startReactor() {
  * @return
  */
 int stopReactor(Reactor* r) {
-    // stop the run
-    // free the poll list
-    r->run = 0;
+    if (r) {
+        // Free allocated memory
+        free(r->pfds);
+        free(r->f2f);
+        free(r);
+    }
     return 0;
 }
 

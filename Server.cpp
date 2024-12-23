@@ -19,6 +19,8 @@
 #include "LeaderFollower.hpp"
 namespace fs = std::filesystem;
 
+Reactor* reactor = nullptr;
+
 int get_listener_socket()
 {
     int listeningSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -83,11 +85,12 @@ void signalHandler(int signal){
         cout << "Stopping LeaderFollower" << endl;
         LeaderFollower::destroyAll();
         
-        pid_t pid = getpid(); // Get the current process ID
+        stopReactor(reactor);
+        
+        pid_t pid = getpid();
         std::cout << "Process ID: " << pid << std::endl;
         std::cout << "Threads in this process:" << std::endl;
         listThreads(pid);
-        // listThreads();
         exit(0);
     }
 }
@@ -106,7 +109,7 @@ int main()
 
     ClientHandler::startMonitorHandlers();
 
-    Reactor *reactor = startReactor();
+    reactor = startReactor();
     addFdToReactor(reactor, listener, ClientHandler::handleConnection);
     while (reactor->run)
     {
