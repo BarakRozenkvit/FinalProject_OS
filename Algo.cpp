@@ -85,10 +85,13 @@ pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
 
     Graph tree;
     tree.newGraph(graph.vertexNum());
+    
+    // Allocate parent array
     int* parent = new int[V];
     for (int i = 0; i < V; i++) {
         parent[i] = i;
     }
+
     int i = 0, e = 0;
     while (e < V - 1 && i < _edges.size()) {
         int w = _edges[i].first;
@@ -110,6 +113,10 @@ pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
             parent[x] = y;
         }
     }
+
+    // Free the parent array
+    delete[] parent;
+    
     // send the fd the result
     Util::outputHandler("Finished Kruskal\n",fd);
     return make_pair(fd,tree);
