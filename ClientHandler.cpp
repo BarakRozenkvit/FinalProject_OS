@@ -60,7 +60,10 @@ bool ClientHandler::handleGraph(int fd) {
                 throw invalid_argument("Cant Calculate on Empty Graph!\n");
             }
 
-            ClientHandler::outputHandler("Results:\n", fd);
+            if(!Graph::users_graphs[fd].isConnected()){
+                throw invalid_argument("Graph is not connected - cannot find MST\n");
+            }
+
 
             if (process == "P") {
                 // Pipeline implementation
@@ -71,8 +74,9 @@ bool ClientHandler::handleGraph(int fd) {
                 lf->addTask(fd, Graph::users_graphs[fd]);
              // lf->addTask(fd, graph->getGraph());
             }
-
             sleep(1);
+
+            ClientHandler::outputHandler("Results:\n", fd);
             ClientHandler::inputHandler("Press Any Key to Continue...\n", fd);
             return false;
 

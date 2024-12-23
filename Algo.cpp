@@ -6,6 +6,13 @@ int sleep_time = 2;
 
 pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
     sleep(sleep_time);
+    
+    // Check if graph is connected
+    if(!graph.isConnected()) {
+        Util::outputHandler("Error: Graph is not connected - cannot find MST\n", fd);
+        return make_pair(fd, graph);  // Return original graph
+    }
+
     int v = graph.vertexNum();
     // vector to store the parent of vertex
     vector<int> parent(v);
@@ -72,6 +79,13 @@ pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
 
 pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
     sleep(sleep_time);
+    
+    // Check if graph is connected
+    if(!graph.isConnected()) {
+        Util::outputHandler("Error: Graph is not connected - cannot find MST\n", fd);
+        return make_pair(fd, graph);  // Return original graph
+    }
+
     int V = graph.vertexNum();
     vector<pair<int, pair<int, int>>> _edges;
     for (int i = 0; i < V; i++) {

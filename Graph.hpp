@@ -48,20 +48,25 @@ public:
     /*
     * Get number of vertices
     */
-    int vertexNum();
+    int vertexNum() const;
 
     /*
      * Get number of edge
      */
-    int edgeNum();
+    int edgeNum() const;
 
     /*
      * Get weight of edge
      */
-    int at(int v, int u);
+    int at(int v, int u) const;
 
     /*
      * Get Deep copy of this graph
      */
     Graph getGraph() const;
+
+    bool isConnected() const;
+
+private:
+    void DFS(int v, vector<bool>& visited) const;
 };

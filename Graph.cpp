@@ -34,15 +34,15 @@ void Graph::removeEdge(int v, int u) {
     _edgeCounter--;
 }
 
-int Graph::edgeNum() {
+int Graph::edgeNum() const{
     return _edgeCounter;
 }
 
-int Graph::vertexNum() {
+int Graph::vertexNum() const {
     return _graph.size();
 }
 
-int Graph::at(int v, int u) {
+int Graph::at(int v, int u) const {
     return _graph[v][u];
 }
 
@@ -53,4 +53,27 @@ Graph::Graph(Graph const &g) {
 
 Graph Graph::getGraph() const{
     return *this;
+}
+
+void Graph::DFS(int v, vector<bool>& visited) const {
+    visited[v] = true;
+    for(int i = 0; i < vertexNum(); i++) {
+        if(_graph[v][i] && !visited[i]) {
+            DFS(i, visited);
+        }
+    }
+}
+
+bool Graph::isConnected() const {
+    if(vertexNum() == 0) return true;
+    
+    vector<bool> visited(vertexNum(), false);
+    // Start DFS from vertex 0
+    DFS(0, visited);
+    
+    // Check if all vertices were visited
+    for(int i = 0; i < vertexNum(); i++) {
+        if(!visited[i]) return false;
+    }
+    return true;
 }
