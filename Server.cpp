@@ -68,32 +68,30 @@ void listThreads(pid_t pid) {
 
     try {
         for (const auto& entry : fs::directory_iterator(taskDir)) {
-            std::cout << "Thread ID: " << entry.path().filename().string() << std::endl;
+         //   std::cout << "Thread ID: " << entry.path().filename().string() << std::endl;
         }
     } catch (const std::exception& e) {
         std::cerr << "Error accessing task directory: " << e.what() << std::endl;
     }
 }
 
-void signalHandler(int signal){
-    if (signal == SIGINT){
-        std::cout << "shutting down gracefully..." << std::endl;
-        cout << "Stopping Client Handlers" << endl;
+void signalHandler(int signal) {
+    if (signal == SIGINT) {
+        pthread_mutex_lock(&isRunningMutex);
+        _isRunning = false;
+        pthread_mutex_unlock(&isRunningMutex);
+
         ClientHandler::killHandlers();
-        cout << "Stopping Pipeline" << endl;
         Pipeline::destroyAll();
-        cout << "Stopping LeaderFollower" << endl;
         LeaderFollower::destroyAll();
-        
         stopReactor(reactor);
-        
+
         pid_t pid = getpid();
-        std::cout << "Process ID: " << pid << std::endl;
-        std::cout << "Threads in this process:" << std::endl;
         listThreads(pid);
         exit(0);
     }
 }
+
 
 int main()
 {

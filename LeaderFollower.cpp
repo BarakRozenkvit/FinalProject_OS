@@ -21,11 +21,14 @@ LeaderFollower::LeaderFollower(pair<int, Graph> (*mstAlgo)(int, Graph), int thre
  * Destructor ensures clean shutdown and resource cleanup
  */
 LeaderFollower::~LeaderFollower() {
-    stop();
+    if (_isRunning) {
+        stop();
+    }
+    // Ensure no threads are using mutexes before destroying
     pthread_mutex_destroy(&_taskMutex);
     pthread_cond_destroy(&_taskCond);
     pthread_cond_destroy(&_queueCond);
-    pthread_cond_destroy(&_leaderCond);  // Destroy leader condition
+    pthread_cond_destroy(&_leaderCond);
 }
 
 /**
@@ -54,9 +57,14 @@ void LeaderFollower::destroyAll() {
  * Signals all threads to stop and waits for completion
  */
 void LeaderFollower::stop() {
+    pthread_mutex_lock(&_taskMutex);
     _isRunning = false;
-    pthread_cond_broadcast(&_taskCond);  // Wake all threads for shutdown
-    for (pthread_t thread : _threads) {  // Wait for all threads to finish
+    pthread_cond_broadcast(&_taskCond);  // Wake all waiting threads
+    pthread_cond_broadcast(&_leaderCond); // Wake threads waiting for leadership
+    pthread_mutex_unlock(&_taskMutex);
+
+    // Wait for all threads to finish
+    for (pthread_t thread : _threads) {
         pthread_join(thread, nullptr);
     }
     _threads.clear();
@@ -86,42 +94,46 @@ void LeaderFollower::addTask(int fd, Graph graph) {
 void* LeaderFollower::workerThread(void* arg) {
     LeaderFollower* lf = static_cast<LeaderFollower*>(arg);
 
-    while (lf->_isRunning) {
-        pthread_mutex_lock(&lf->_taskMutex); 
-
-        // Wait until there are tasks or the pool is shutting down
-        while (lf->_tasks.empty() && lf->_isRunning) {
-            pthread_cond_wait(&lf->_taskCond, &lf->_taskMutex); // Releases the lock and waits for _taskCond when the 
-                                                                // task queue is empty. It prevents busy-waiting.
-        }
-
-        // If shutting down, exit
-        if (!lf->_isRunning) {
+    while (true) {
+        pthread_mutex_lock(&lf->_taskMutex);
+        
+        if (!lf->_isRunning && lf->_tasks.empty()) {
             pthread_mutex_unlock(&lf->_taskMutex);
             break;
         }
 
-        // Leader election: If no leader or this thread is the leader
-        if (lf->_leaderThread == 0 || lf->_leaderThread == pthread_self()) {
-            lf->_leaderThread = pthread_self();  // Assign leadership
-            pthread_mutex_unlock(&lf->_taskMutex);
-
-            // Process the next task
-            lf->processNextTask();
-
-            pthread_mutex_lock(&lf->_taskMutex);
-            lf->_leaderThread = 0;                     // Release leadership
-            pthread_cond_broadcast(&lf->_leaderCond);  // Wake all waiting threads
-            pthread_cond_signal(&lf->_taskCond);       // Signal task availability
-            pthread_mutex_unlock(&lf->_taskMutex);
-        } else {
-            // Non-leader threads wait until leadership is available
-            pthread_cond_wait(&lf->_leaderCond, &lf->_taskMutex);
+        // Wait for tasks
+        while (lf->_tasks.empty() && lf->_isRunning) {
+            pthread_cond_wait(&lf->_taskCond, &lf->_taskMutex);
         }
 
-        pthread_mutex_unlock(&lf->_taskMutex);
-    }
+        // // Recheck condition after wait
+        // if (!lf->_isRunning && lf->_tasks.empty()) {
+        //     pthread_mutex_unlock(&lf->_taskMutex);
+        //     break;
+        // }
 
+        // Process task if available
+        if (!lf->_tasks.empty()) {
+            auto task = lf->_tasks.front();
+            lf->_tasks.pop();
+            pthread_mutex_unlock(&lf->_taskMutex);
+            
+            // Process task
+            try {
+                pair<int, Graph> result = lf->_mstAlgo(task.first, task.second);
+                result = DistanceAlgo::FloydWarshall(result.first, result.second);
+                result = GraphAlgo::getTotalWeight(result.first, result.second);
+                result = GraphAlgo::averageDistance(result.first, result.second);
+                result = GraphAlgo::longestDistance(result.first, result.second);
+                result = GraphAlgo::shortestDistance(result.first, result.second);
+            } catch (const std::exception& e) {
+                std::cerr << "Exception during task processing: " << e.what() << std::endl;
+            }
+        } else {
+            pthread_mutex_unlock(&lf->_taskMutex);
+        }
+    }
     return nullptr;
 }
 

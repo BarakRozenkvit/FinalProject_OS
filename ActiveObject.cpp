@@ -11,35 +11,43 @@ ActiveObject::ActiveObject(pair<int,Graph> (*process)(int,Graph),ActiveObject* n
 }
 
 ActiveObject::~ActiveObject(){
+    pthread_mutex_lock(&_mutex);
     _isRunning = false;
     pthread_cond_signal(&_cond);
+    pthread_mutex_unlock(&_mutex);
 }
 
-void ActiveObject::run(){
-    while(_isRunning){
-        // lock the mutex to know if the queue is empty
+void ActiveObject::run() {
+    while (_isRunning) {
         pthread_mutex_lock(&_mutex);
-        bool tasksEmpty = _tasks.empty();
-        pthread_mutex_unlock(&_mutex);
-    
-        if (tasksEmpty){
-            // if queue is empty wait for cond that new task cames
-            pthread_cond_wait(&_cond, &_mutex);
-            if (!_isRunning){
-                return;
-            }
+
+        // Wait for tasks to be available or stop signal
+        while (_tasks.empty() && _isRunning) {
+            pthread_cond_wait(&_cond, &_mutex); // Automatically releases the mutex while waiting
         }
-        // get new task and pop queue
-        pair<int,Graph> task = _tasks.front();
+
+        if (!_isRunning) {
+            pthread_mutex_unlock(&_mutex); // Ensure mutex is unlocked before exiting
+            return;
+        }
+
+        // Get new task and pop from the queue
+        auto task = _tasks.front();
         _tasks.pop();
-        // get result from process
-        pair<int,Graph> result = _process(task.first,task.second);
-        // if next active object push task to its queue
-        if(_next){
-            _next->pushTask(result);
+
+        pthread_mutex_unlock(&_mutex); // Unlock the mutex before processing the task
+
+        // Process the task
+        try {
+            auto result = _process(task.first, task.second);
+
+            // Push the result to the next active object if it exists
+            if (_next) {
+                _next->pushTask(result);
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Exception in task processing: " << e.what() << std::endl;
         }
-        // unlock the mutex
-        pthread_mutex_unlock(&_mutex);
     }
 }
 

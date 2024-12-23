@@ -14,6 +14,8 @@
 
 #pragma once
 
+extern pthread_mutex_t pauseMutex;
+
 using namespace std;
 
 // Function type for clients threads

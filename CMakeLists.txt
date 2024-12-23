@@ -5,13 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(.)
 
-# Debug configuration.
+# Debug configuration with simpler debug flags
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -fno-omit-frame-pointer")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -fno-omit-frame-pointer")
-
-# Disable optimizations for better debugging
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")  # Simplified debug flags
 
 add_executable(FinalProject_OS
         Graph.cpp

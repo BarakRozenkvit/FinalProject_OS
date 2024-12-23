@@ -16,6 +16,8 @@ class Graph{
 
 public:
 
+static pthread_mutex_t graph_mutex;
+
     /*
      * Map of users and their graphs
      */

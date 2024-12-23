@@ -3,6 +3,8 @@
 
 using namespace std;
 
+pthread_mutex_t Graph::graph_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 map<int,Graph> Graph::users_graphs = map<int,Graph>();
 
 void Graph::newGraph(int n) {

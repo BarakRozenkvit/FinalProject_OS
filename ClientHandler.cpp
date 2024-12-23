@@ -11,6 +11,8 @@ pthread_t _monitor;
 
 bool _isRunning = true;
 
+pthread_mutex_t isRunningMutex = PTHREAD_MUTEX_INITIALIZER;
+
 bool ClientHandler::handleGraph(int fd) {
     ClientHandler::outputHandler("Requesting Permission to Graph...\n", fd);
 
@@ -30,7 +32,9 @@ bool ClientHandler::handleGraph(int fd) {
         try {
             int size = stoi(number);
             // graph->newGraph(size);
+            pthread_mutex_lock(&Graph::graph_mutex);
             Graph::users_graphs[fd].newGraph(size);
+            pthread_mutex_unlock(&Graph::graph_mutex);
             
         } catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler("Number not provided!", fd);
@@ -54,6 +58,7 @@ bool ClientHandler::handleGraph(int fd) {
         string algo = ClientHandler::inputHandler(
             "Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
 
+        pthread_mutex_lock(&Graph::graph_mutex);
         try {
         //  if (!graph->vertexNum()) {
             if (!Graph::users_graphs[fd].vertexNum()) {
@@ -65,25 +70,26 @@ bool ClientHandler::handleGraph(int fd) {
             }
 
 
+
             if (process == "P") {
                 // Pipeline implementation
                 FactoryPipeline::get(algo)->addTask(fd, Graph::users_graphs[fd]);
-            //  FactoryPipeline::get(algo)->addTask(fd, graph->getGraph());
             } else {  // LF - Leader-Follower
                 LeaderFollower* lf = LeaderFollowerFactory::get(algo);
                 lf->addTask(fd, Graph::users_graphs[fd]);
-             // lf->addTask(fd, graph->getGraph());
             }
             sleep(1);
 
             ClientHandler::outputHandler("Results:\n", fd);
             ClientHandler::inputHandler("Press Any Key to Continue...\n", fd);
+            pthread_mutex_unlock(&Graph::graph_mutex);
             return false;
 
         } catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
         }
+        pthread_mutex_unlock(&Graph::graph_mutex);
 
         return false;
 
@@ -95,6 +101,7 @@ bool ClientHandler::handleGraph(int fd) {
         inputStream >> vstr;
         inputStream >> ustr;
         inputStream >> wstr;
+        pthread_mutex_lock(&Graph::graph_mutex);
         try {
             int v = stoi(vstr);
             int u = stoi(ustr);
@@ -106,6 +113,7 @@ bool ClientHandler::handleGraph(int fd) {
             sleep(1);
         }
 
+        pthread_mutex_unlock(&Graph::graph_mutex);
         return false;
 
         // get edge parameters and remove from graph
@@ -115,6 +123,7 @@ bool ClientHandler::handleGraph(int fd) {
         string vstr, ustr;
         inputStream >> vstr;
         inputStream >> ustr;
+        pthread_mutex_lock(&Graph::graph_mutex);
         try {
             int v = stoi(vstr);
             int u = stoi(ustr);
@@ -124,6 +133,7 @@ bool ClientHandler::handleGraph(int fd) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
         }
+        pthread_mutex_unlock(&Graph::graph_mutex);
         return false;
 
         // if exit set flag
@@ -170,12 +180,15 @@ string ClientHandler::inputHandler(string message, int fd) {
     char buffer[256] = {'\0'};
     size_t receiveBytes = recv(fd, buffer, sizeof(buffer), 0);
     if (receiveBytes == 0) {
+        pthread_mutex_lock(&Graph::graph_mutex);
         Graph::users_graphs.erase(fd);
-        // close(fd);
+        pthread_mutex_unlock(&Graph::graph_mutex);
         return "Exit";
     }
     if (receiveBytes < 0) {
+        pthread_mutex_lock(&Graph::graph_mutex);
         Graph::users_graphs.erase(fd);
+        pthread_mutex_unlock(&Graph::graph_mutex);
         perror("recv");
         return "Exit";
     }
@@ -183,7 +196,9 @@ string ClientHandler::inputHandler(string message, int fd) {
     buffer[receiveBytes - 1] = '\0';
     string input(buffer);
     if (input == "Exit") {
+        pthread_mutex_lock(&Graph::graph_mutex);
         Graph::users_graphs.erase(fd);
+        pthread_mutex_unlock(&Graph::graph_mutex);
         // close(fd);
     }
 
@@ -191,17 +206,25 @@ string ClientHandler::inputHandler(string message, int fd) {
 }
 
 void* ClientHandler::handleClient(int fd) {
-    cout << "Starting Client " <<fd<< endl;
-    // while handle graph is true, keep on
     bool exit = false;
-    while (_isRunning && !exit){
+
+    // Lock the mutex before reading _isRunning
+    pthread_mutex_lock(&isRunningMutex);
+    while (_isRunning && !exit) {
+        pthread_mutex_unlock(&isRunningMutex); // Unlock before calling handleGraph
         exit = ClientHandler::handleGraph(fd);
+        
+        // Lock the mutex again before checking _isRunning
+        pthread_mutex_lock(&isRunningMutex);
     }
-    // if finished handle graph cond for exiting function
-    cout << "Finished Client " <<fd<< endl;
+    pthread_mutex_unlock(&isRunningMutex); // Unlock after exiting the loop
+
+    pthread_mutex_lock(&mutexHandler);
     pthread_cond_signal(&condHandler);
+    pthread_mutex_unlock(&mutexHandler);
     return nullptr;
 }
+
 
 void ClientHandler::outputHandler(string message, int fd) {
     // send messege to fd
@@ -213,27 +236,35 @@ void ClientHandler::outputHandler(string message, int fd) {
 }
 
 void* ClientHandler::monitorHandlers(void*) {
-    cout << "Started monitor "<< endl;
-    while (_isRunning) {
-        // wait for thread is finished
-        pthread_cond_wait(&condHandler, &mutexHandler);
-        if(!_isRunning){
-            cout << "In monitor: Finished monitor "<< endl;
-            return nullptr;
+    while (true) {
+        pthread_mutex_lock(&isRunningMutex);
+        if (!_isRunning) {
+            pthread_mutex_unlock(&isRunningMutex);
+            break;
         }
+        pthread_mutex_unlock(&isRunningMutex);
+
+        pthread_mutex_lock(&mutexHandler);
+        pthread_cond_wait(&condHandler, &mutexHandler);
         for (auto it = handlers.begin(); it != handlers.end();) {
             proactorArgsClient* data = static_cast<proactorArgsClient*>((*it).second);
-            // get args of thread, if finished stop it and erase from list
-            if (data->pause) {
-                cout << "in monitor: Stopping clint " <<data->sockfd<< endl;
+
+            pthread_mutex_lock(&pauseMutex); // Lock to safely access `pause`
+            bool isPaused = data->pause;
+            pthread_mutex_unlock(&pauseMutex); // Unlock after accessing `pause`
+
+            if (isPaused) {
                 stopProactorClient((*it).first, data);
                 handlers.erase(it);
             } else {
                 ++it;
             }
         }
+        pthread_mutex_unlock(&mutexHandler);
     }
+    return nullptr;
 }
+
 
 void ClientHandler::startMonitorHandlers() {
     // start thread for monitor handlers and add to handlers
@@ -244,16 +275,18 @@ void ClientHandler::startMonitorHandlers() {
 }
 
 void ClientHandler::killHandlers() {
-    _isRunning = false;
+    pthread_mutex_lock(&isRunningMutex);
+    _isRunning = false;  // Safely set _isRunning to false
+    pthread_mutex_unlock(&isRunningMutex);
+
     pthread_mutex_lock(&mutexHandler);
     for (auto id : handlers) {
-        // for every thread in list stop the handlers
         proactorArgsClient* data = static_cast<proactorArgsClient*>(id.second);
-        cout << "in Kill Stopping clint " <<data->sockfd<< endl;
         stopProactorClient(id.first, data);
     }
+    pthread_cond_signal(&condHandler);  // Signal only once
     pthread_mutex_unlock(&mutexHandler);
-    pthread_cond_signal(&condHandler);
-    cout << "in Kill: Stopping monitor "<< endl;
+
     pthread_join(_monitor, nullptr);
 }
+

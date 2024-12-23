@@ -25,6 +25,7 @@ extern pthread_cond_t condHandler;
 extern pthread_mutex_t mutexHandler;
 extern bool _isRunning;
 extern pthread_t _monitor;
+extern pthread_mutex_t isRunningMutex;
 
 namespace ClientHandler{
     /*
