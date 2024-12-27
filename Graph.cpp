@@ -31,6 +31,9 @@ void Graph::addEdge(int v, int u, int w) {
 }
 
 void Graph::removeEdge(int v, int u) {
+    if(v >= vertexNum() || u >= vertexNum() || v < 0 || u < 0) {
+        throw invalid_argument("index out of bounds!");
+    }
     _graph[v][u] = 0;
     _graph[u][v] = 0;
     _edgeCounter--;

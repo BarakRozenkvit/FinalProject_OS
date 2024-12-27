@@ -2,7 +2,7 @@
 
 #include <algorithm> 
 
-int sleep_time = 0.5;
+double sleep_time = 0.5;
 
 pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
     sleep(sleep_time);
