@@ -1,14 +1,14 @@
 #include "Algo.hpp"
 
-#include <algorithm> 
+#include <algorithm>
 
 double sleep_time = 0.5;
 
-pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
+pair<int, Graph> MSTAlgo::Prim(int fd, Graph graph) {
     sleep(sleep_time);
-    
+
     // Check if graph is connected
-    if(!graph.isConnected()) {
+    if (!graph.isConnected()) {
         Util::outputHandler("Error: Graph is not connected - cannot find MST\n", fd);
         return make_pair(fd, graph);  // Return original graph
     }
@@ -73,15 +73,15 @@ pair<int,Graph> MSTAlgo::Prim(int fd, Graph graph) {
         tree.addEdge(i, parent[i], graph.at(i, parent[i]));
     }
     // send the fd the result
-    Util::outputHandler("Finished Prim\n",fd);
-    return make_pair(fd,tree);
+    Util::outputHandler("Finished Prim\n", fd);
+    return make_pair(fd, tree);
 }
 
-pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
+pair<int, Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
     sleep(sleep_time);
-    
+
     // Check if graph is connected
-    if(!graph.isConnected()) {
+    if (!graph.isConnected()) {
         Util::outputHandler("Error: Graph is not connected - cannot find MST\n", fd);
         return make_pair(fd, graph);  // Return original graph
     }
@@ -99,7 +99,7 @@ pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
 
     Graph tree;
     tree.newGraph(graph.vertexNum());
-    
+
     // Allocate parent array
     int* parent = new int[V];
     for (int i = 0; i < V; i++) {
@@ -130,13 +130,30 @@ pair<int,Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
 
     // Free the parent array
     delete[] parent;
-    
+
     // send the fd the result
-    Util::outputHandler("Finished Kruskal\n",fd);
-    return make_pair(fd,tree);
+    Util::outputHandler("Finished Kruskal\n", fd);
+    return make_pair(fd, tree);
 }
 
-pair<int,Graph> DistanceAlgo::FloydWarshall(int fd, Graph g) {
+pair<int, Graph> DistanceAlgo::FloydWarshall(int fd, Graph g) {
+    // loop through the matrix and assign each 0 to INT_MAX
+    for (int i = 0; i < g.vertexNum(); i++) {
+        for (int j = 0; j < g.vertexNum(); j++) {
+            if (g.at(i, j) == 0) {
+                g.addEdge(i, j, INT_MAX);
+            }
+        }
+    }
+
+    // print the graph matrix
+    cout << "The graph before Floyd Warshall: " << endl;
+    for (int i = 0; i < g.vertexNum(); i++) {
+        for (int j = 0; j < g.vertexNum(); j++) {
+            cout << g.at(i, j) << " ";
+        }
+        cout << endl;
+    }
     sleep(sleep_time);
     /**
     *   1. D(0) ← W
@@ -149,78 +166,101 @@ pair<int,Graph> DistanceAlgo::FloydWarshall(int fd, Graph g) {
     for (int k = 0; k < g.vertexNum(); k++) {
         for (int i = 0; i < g.vertexNum(); i++) {
             for (int j = 0; j < g.vertexNum(); j++) {
+                if( i == j){
+                    continue;
+                }
                 if (g.at(i, j) && g.at(i, k) + g.at(k, j)) {
-                    g.addEdge(i, j, std::min(g.at(i, j), g.at(i, k) + g.at(k, j)));
+                    if (g.at(i, k) == INT_MAX || g.at(k, j) == INT_MAX) {
+                        g.addEdge(i, j, g.at(i, j));
+                    } else {
+                        g.addEdge(i, j, std::min(g.at(i, j), g.at(i, k) + g.at(k, j)));
+                    }
                 }
             }
         }
     }
     // send the fd the result
-    Util::outputHandler("\nFinished Floyd Warshall\n",fd);
-    return make_pair(fd,g);
+    Util::outputHandler("\nFinished Floyd Warshall\n", fd);
+
+    cout << "The graph after Floyd Warshall: " << endl;
+    for (int i = 0; i < g.vertexNum(); i++) {
+        for (int j = 0; j < g.vertexNum(); j++) {
+            cout << g.at(i, j) << " ";
+        }
+        cout << endl;
+    }
+
+    return make_pair(fd, g);
 }
 
-pair<int,Graph> GraphAlgo::getTotalWeight(int fd, Graph graph) {
+pair<int, Graph> GraphAlgo::getTotalWeight(int fd, Graph graph) {
     sleep(sleep_time);
     int weight = 0;
-    for(int i=0;i<graph.vertexNum();i++){
-        for(int j=0;j<i;j++){
-            weight += graph.at(i,j);
+    for (int i = 0; i < graph.vertexNum(); i++) {
+        for (int j = 0; j < i; j++) {
+            weight += graph.at(i, j);
         }
     }
     // send the fd the result
-    Util::outputHandler("getTotalWeight: " + to_string(weight),fd);
-    return make_pair(fd,graph);
+    Util::outputHandler("getTotalWeight: " + to_string(weight), fd);
+    return make_pair(fd, graph);
 }
 
-pair<int,Graph> GraphAlgo::longestDistance(int fd, Graph graph) {
+pair<int, Graph> GraphAlgo::longestDistance(int fd, Graph graph) {
     sleep(sleep_time);
-    int d=0;
-    for(int i=0;i<graph.vertexNum();i++){
-        for(int j=0;j<i;j++){
-            if (graph.at(i,j) > d){
-                d= graph.at(i,j);
+    int d = 0;
+    for (int i = 0; i < graph.vertexNum(); i++) {
+        for (int j = 0; j < i; j++) {
+            if (graph.at(i, j) > d) {
+                d = graph.at(i, j);
             }
         }
     }
     // send the fd the result
-    Util::outputHandler("longestDistance: " + to_string(d) +"\n",fd);
-    return make_pair(fd,graph);
+    Util::outputHandler("longestDistance: " + to_string(d) + "\n", fd);
+    return make_pair(fd, graph);
 }
 
-pair<int,Graph> GraphAlgo::shortestDistance(int fd, Graph graph) {
+pair<int, Graph> GraphAlgo::shortestDistance(int fd, Graph graph) {
     sleep(sleep_time);
-    int d=INT_MAX;
-    for(int i=0;i<graph.vertexNum();i++){
-        for(int j=0;j<i;j++){
-            if (graph.at(i,j) > 0 && graph.at(i,j) < d){
-                d= graph.at(i,j);
+    int d = INT_MAX;
+    for (int i = 0; i < graph.vertexNum(); i++) {
+        for (int j = 0; j < i; j++) {
+            if (graph.at(i, j) > 0 && graph.at(i, j) < d) {
+                d = graph.at(i, j);
             }
         }
     }
     // send the fd the result
-    Util::outputHandler("shortestDistance: " + to_string(d) + "\n",fd);
-    return make_pair(fd,graph);
-
+    Util::outputHandler("shortestDistance: " + to_string(d) + "\n", fd);
+    return make_pair(fd, graph);
 }
 
-pair<int,Graph> GraphAlgo::averageDistance(int fd, Graph graph) {
+pair<int, Graph> GraphAlgo::averageDistance(int fd, Graph graph) {
+    // // print the graph matrix
+    // for(int i=0;i<graph.vertexNum();i++){
+    //     for(int j=0;j<graph.vertexNum();j++){
+    //         cout<<graph.at(i,j)<<" ";
+    //     }
+    //     cout<<endl;
+    // }
+
     sleep(sleep_time);
-    double totalDistance = 0; // Total sum of distances
-    int count = 0;           // Count of unique pairs
+    double totalDistance = 0;  // Total sum of distances
+    int count = 0;             // Count of unique pairs
 
     // Iterate over all unique pairs (i < j)
     for (int i = 0; i < graph.vertexNum(); i++) {
         for (int j = i + 1; j < graph.vertexNum(); j++) {
-            if (graph.at(i, j) != INT_MAX) { // Include valid shortest paths
+            if (graph.at(i, j) != INT_MAX) {  // Include valid shortest paths
                 totalDistance += graph.at(i, j);
                 count++;
             }
         }
     }
     // send the fd the result
-    Util::outputHandler("\naverageDistance: " + to_string(totalDistance/count) +"\n" ,fd);
-    return make_pair(fd,graph);
+    Util::outputHandler("\naverageDistance: " + to_string(totalDistance / count) + "\n", fd);
+    return make_pair(fd, graph);
 }
 
 void Util::outputHandler(string message, int fd) {

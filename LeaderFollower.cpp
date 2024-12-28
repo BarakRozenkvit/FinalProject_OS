@@ -163,8 +163,8 @@ void* LeaderFollower::workerThread(void* arg) {
         // Execute the MST task
         try {
             pair<int, Graph> result = lf->_mstAlgo(task.first, task.second);
-            result = DistanceAlgo::FloydWarshall(result.first, result.second);
             result = GraphAlgo::getTotalWeight(result.first, result.second);
+            result = DistanceAlgo::FloydWarshall(result.first, result.second);
             result = GraphAlgo::averageDistance(result.first, result.second);
             result = GraphAlgo::longestDistance(result.first, result.second);
             result = GraphAlgo::shortestDistance(result.first, result.second);
