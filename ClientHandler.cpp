@@ -79,7 +79,7 @@ bool ClientHandler::handleGraph(int fd) {
             }
             sleep(1);
 
-            ClientHandler::inputHandler("Press Any Key to Continue...\n", fd);
+            // ClientHandler::inputHandler("Press Any Key to Continue...\n", fd);
             pthread_mutex_unlock(&Graph::graph_mutex);
             return false;
 
