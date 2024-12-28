@@ -107,12 +107,6 @@ void* LeaderFollower::workerThread(void* arg) {
             pthread_cond_wait(&lf->_taskCond, &lf->_taskMutex);
         }
 
-        // // Recheck condition after wait
-        // if (!lf->_isRunning && lf->_tasks.empty()) {
-        //     pthread_mutex_unlock(&lf->_taskMutex);
-        //     break;
-        // }
-
         // Process task if available
         if (!lf->_tasks.empty()) {
             auto task = lf->_tasks.front();
@@ -173,10 +167,10 @@ void LeaderFollower::processNextTask() {
 /**
  * Log the current status of the task queue and threads
  */
-void LeaderFollower::logStatus() {
-    pthread_mutex_lock(&_taskMutex);
-    std::cerr << "Thread Pool Status: " << _threads.size()
-              << " threads, Queue Size: " << _tasks.size()
-              << ", Queue Limit: " << _queueLimit << std::endl;
-    pthread_mutex_unlock(&_taskMutex);
-}
+// void LeaderFollower::logStatus() {
+//     pthread_mutex_lock(&_taskMutex);
+//     std::cerr << "Thread Pool Status: " << _threads.size()
+//               << " threads, Queue Size: " << _tasks.size()
+//               << ", Queue Limit: " << _queueLimit << std::endl;
+//     pthread_mutex_unlock(&_taskMutex);
+// }
