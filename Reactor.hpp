@@ -50,13 +50,3 @@ int stopReactor(Reactor* r);
  * @return
  */
 int addFdToReactor(Reactor* r,int fd, reactorFunc func);
-/**
- * remove fd from reactor
- * @param r - reactor
- * @param fd - file descriptor of client
- * @return
- */
-int removeFdFromReactor(Reactor* r,int fd);
-
-
-

@@ -39,10 +39,6 @@ void Graph::removeEdge(int v, int u) {
     _edgeCounter--;
 }
 
-int Graph::edgeNum() const{
-    return _edgeCounter;
-}
-
 int Graph::vertexNum() const {
     return _graph.size();
 }
@@ -56,9 +52,6 @@ Graph::Graph(Graph const &g) {
     _edgeCounter = g._edgeCounter;
 }
 
-Graph Graph::getGraph() const{
-    return *this;
-}
 
 void Graph::DFS(int v, vector<bool>& visited) const {
     visited[v] = true;

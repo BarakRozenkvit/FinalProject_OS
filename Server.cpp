@@ -63,31 +63,13 @@ int get_listener_socket()
     return listeningSocket;
 }
 
-void listThreads(pid_t pid) {
-    std::string taskDir = "/proc/" + std::to_string(pid) + "/task";
-
-    try {
-        for (const auto& entry : fs::directory_iterator(taskDir)) {
-         //   std::cout << "Thread ID: " << entry.path().filename().string() << std::endl;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Error accessing task directory: " << e.what() << std::endl;
-    }
-}
-
 void signalHandler(int signal) {
     if (signal == SIGINT) {
-        pthread_mutex_lock(&isRunningMutex);
-        _isRunning = false;
-        pthread_mutex_unlock(&isRunningMutex);
 
         ClientHandler::killHandlers();
         Pipeline::destroyAll();
         LeaderFollower::destroyAll();
         stopReactor(reactor);
-
-        pid_t pid = getpid();
-        listThreads(pid);
         exit(0);
     }
 }

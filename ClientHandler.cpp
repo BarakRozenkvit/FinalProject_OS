@@ -35,7 +35,7 @@ bool ClientHandler::handleGraph(int fd) {
             pthread_mutex_lock(&Graph::graph_mutex);
             Graph::users_graphs[fd].newGraph(size);
             pthread_mutex_unlock(&Graph::graph_mutex);
-            
+
         } catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler("Number not provided!", fd);
             sleep(1);
@@ -59,17 +59,16 @@ bool ClientHandler::handleGraph(int fd) {
             "Choose MST algorithm\n- Prim\n- Kruskal\nYour Input: ", fd);
 
         pthread_mutex_lock(&Graph::graph_mutex);
+        ClientHandler::outputHandler("Results:\n", fd);
         try {
-        //  if (!graph->vertexNum()) {
+            //  if (!graph->vertexNum()) {
             if (!Graph::users_graphs[fd].vertexNum()) {
                 throw invalid_argument("Cant Calculate on Empty Graph!\n");
             }
 
-            if(!Graph::users_graphs[fd].isConnected()){
+            if (!Graph::users_graphs[fd].isConnected()) {
                 throw invalid_argument("Graph is not connected - cannot find MST\n");
             }
-
-
 
             if (process == "P") {
                 // Pipeline implementation
@@ -80,7 +79,6 @@ bool ClientHandler::handleGraph(int fd) {
             }
             sleep(1);
 
-            ClientHandler::outputHandler("Results:\n", fd);
             ClientHandler::inputHandler("Press Any Key to Continue...\n", fd);
             pthread_mutex_unlock(&Graph::graph_mutex);
             return false;
@@ -107,7 +105,7 @@ bool ClientHandler::handleGraph(int fd) {
             int u = stoi(ustr);
             int w = stoi(wstr);
             Graph::users_graphs[fd].addEdge(v, u, w);
-          //graph->addEdge(v, u, w);
+            // graph->addEdge(v, u, w);
         } catch (const invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
@@ -128,7 +126,7 @@ bool ClientHandler::handleGraph(int fd) {
             int v = stoi(vstr);
             int u = stoi(ustr);
             Graph::users_graphs[fd].removeEdge(v, u);
-         // graph->removeEdge(v, u);
+            // graph->removeEdge(v, u);
         } catch (const invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);
             sleep(1);
@@ -145,7 +143,6 @@ bool ClientHandler::handleGraph(int fd) {
         ClientHandler::outputHandler("Unknown command!", fd);
         sleep(1);
         return false;
-
     }
 }
 
@@ -199,7 +196,6 @@ string ClientHandler::inputHandler(string message, int fd) {
         pthread_mutex_lock(&Graph::graph_mutex);
         Graph::users_graphs.erase(fd);
         pthread_mutex_unlock(&Graph::graph_mutex);
-        // close(fd);
     }
 
     return input;
@@ -211,20 +207,21 @@ void* ClientHandler::handleClient(int fd) {
     // Lock the mutex before reading _isRunning
     pthread_mutex_lock(&isRunningMutex);
     while (_isRunning && !exit) {
-        pthread_mutex_unlock(&isRunningMutex); // Unlock before calling handleGraph
+        pthread_mutex_unlock(&isRunningMutex);  // Unlock before calling handleGraph
         exit = ClientHandler::handleGraph(fd);
-        
+
         // Lock the mutex again before checking _isRunning
         pthread_mutex_lock(&isRunningMutex);
     }
-    pthread_mutex_unlock(&isRunningMutex); // Unlock after exiting the loop
+    pthread_mutex_unlock(&isRunningMutex);  // Unlock after exiting the loop
 
-    pthread_mutex_lock(&mutexHandler);
-    pthread_cond_signal(&condHandler);
-    pthread_mutex_unlock(&mutexHandler);
+    if (exit && _isRunning) {
+        pthread_mutex_lock(&mutexHandler);
+        pthread_cond_signal(&condHandler);
+        pthread_mutex_unlock(&mutexHandler);
+    }
     return nullptr;
 }
-
 
 void ClientHandler::outputHandler(string message, int fd) {
     // send messege to fd
@@ -236,8 +233,8 @@ void ClientHandler::outputHandler(string message, int fd) {
 }
 
 void* ClientHandler::monitorHandlers(void*) {
-    while (true) {
-        pthread_mutex_lock(&isRunningMutex);
+    pthread_mutex_lock(&isRunningMutex);
+    while (_isRunning) {
         if (!_isRunning) {
             pthread_mutex_unlock(&isRunningMutex);
             break;
@@ -249,9 +246,9 @@ void* ClientHandler::monitorHandlers(void*) {
         for (auto it = handlers.begin(); it != handlers.end();) {
             proactorArgsClient* data = static_cast<proactorArgsClient*>((*it).second);
 
-            pthread_mutex_lock(&pauseMutex); // Lock to safely access `pause`
+            pthread_mutex_lock(&pauseMutex);  // Lock to safely access `pause`
             bool isPaused = data->pause;
-            pthread_mutex_unlock(&pauseMutex); // Unlock after accessing `pause`
+            pthread_mutex_unlock(&pauseMutex);  // Unlock after accessing `pause`
 
             if (isPaused) {
                 stopProactorClient((*it).first, data);
@@ -265,10 +262,10 @@ void* ClientHandler::monitorHandlers(void*) {
     return nullptr;
 }
 
-
 void ClientHandler::startMonitorHandlers() {
     // start thread for monitor handlers and add to handlers
     int ret = pthread_create(&_monitor, nullptr, ClientHandler::monitorHandlers, nullptr);
+    // cout << "Monitor id: " << _monitor << endl;
     if (ret != 0) {
         perror("pthread_create");
     }
@@ -289,4 +286,3 @@ void ClientHandler::killHandlers() {
 
     pthread_join(_monitor, nullptr);
 }
-

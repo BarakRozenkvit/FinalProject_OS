@@ -53,19 +53,10 @@ static pthread_mutex_t graph_mutex;
     int vertexNum() const;
 
     /*
-     * Get number of edge
-     */
-    int edgeNum() const;
-
-    /*
      * Get weight of edge
      */
     int at(int v, int u) const;
-
-    /*
-     * Get Deep copy of this graph
-     */
-    Graph getGraph() const;
+    
 
     bool isConnected() const;
 

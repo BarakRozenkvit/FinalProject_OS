@@ -7,12 +7,6 @@ double sleep_time = 0.5;
 pair<int, Graph> MSTAlgo::Prim(int fd, Graph graph) {
     sleep(sleep_time);
 
-    // Check if graph is connected
-    if (!graph.isConnected()) {
-        Util::outputHandler("Error: Graph is not connected - cannot find MST\n", fd);
-        return make_pair(fd, graph);  // Return original graph
-    }
-
     int v = graph.vertexNum();
     // vector to store the parent of vertex
     vector<int> parent(v);
@@ -79,12 +73,6 @@ pair<int, Graph> MSTAlgo::Prim(int fd, Graph graph) {
 
 pair<int, Graph> MSTAlgo::Kruskal(int fd, Graph graph) {
     sleep(sleep_time);
-
-    // Check if graph is connected
-    if (!graph.isConnected()) {
-        Util::outputHandler("Error: Graph is not connected - cannot find MST\n", fd);
-        return make_pair(fd, graph);  // Return original graph
-    }
 
     int V = graph.vertexNum();
     vector<pair<int, pair<int, int>>> _edges;
@@ -155,14 +143,7 @@ pair<int, Graph> DistanceAlgo::FloydWarshall(int fd, Graph g) {
         cout << endl;
     }
     sleep(sleep_time);
-    /**
-    *   1. D(0) ← W
-        2. for k ← 1 to n
-            3. do for i ← 1 to n
-                4. do for j ← 1 to n
-                    5. do dij(k) ← min (dij(k-1), dik(k-1) + dkj(k-1))
-        6. return D(n)
-     */
+
     for (int k = 0; k < g.vertexNum(); k++) {
         for (int i = 0; i < g.vertexNum(); i++) {
             for (int j = 0; j < g.vertexNum(); j++) {

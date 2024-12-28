@@ -67,21 +67,4 @@ int addFdToReactor(Reactor* r, int fd, reactorFunc func) {
     r->fd_count++;
     return 0;
 }
-/**
- * remove fd from reactor
- * @param r - reactor
- * @param fd - file descriptor of client
- * @return
- */
-int removeFdFromReactor(Reactor* r, int fd) {
-    // search for fds in poll list and remove from map
-    for (int i = 0; i < r->fd_count; i++) {
-        if (r->pfds[i].fd == fd) {
-            r->pfds[i].fd = -1;
-            r->f2f[i].fd = -1;
-            close(fd);
-            return 0;
-        }
-    }
-    return -1;
-}
+
