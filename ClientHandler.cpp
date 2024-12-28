@@ -233,13 +233,11 @@ void ClientHandler::outputHandler(string message, int fd) {
 }
 
 void* ClientHandler::monitorHandlers(void*) {
-    pthread_mutex_lock(&isRunningMutex);
-    while (_isRunning) {
-        if (!_isRunning) {
-            pthread_mutex_unlock(&isRunningMutex);
-            break;
-        }
-        pthread_mutex_unlock(&isRunningMutex);
+    pthread_mutex_lock(&isRunningMutex);    
+    bool run = _isRunning;
+    pthread_mutex_unlock(&isRunningMutex);
+    
+    while (run) {
 
         pthread_mutex_lock(&mutexHandler);
         pthread_cond_wait(&condHandler, &mutexHandler);
@@ -258,6 +256,9 @@ void* ClientHandler::monitorHandlers(void*) {
             }
         }
         pthread_mutex_unlock(&mutexHandler);
+        pthread_mutex_lock(&isRunningMutex);    
+        run = _isRunning;
+        pthread_mutex_unlock(&isRunningMutex);
     }
     return nullptr;
 }
@@ -265,7 +266,6 @@ void* ClientHandler::monitorHandlers(void*) {
 void ClientHandler::startMonitorHandlers() {
     // start thread for monitor handlers and add to handlers
     int ret = pthread_create(&_monitor, nullptr, ClientHandler::monitorHandlers, nullptr);
-    // cout << "Monitor id: " << _monitor << endl;
     if (ret != 0) {
         perror("pthread_create");
     }
@@ -283,6 +283,4 @@ void ClientHandler::killHandlers() {
     }
     pthread_cond_signal(&condHandler);  // Signal only once
     pthread_mutex_unlock(&mutexHandler);
-
-    pthread_join(_monitor, nullptr);
 }

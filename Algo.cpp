@@ -134,14 +134,6 @@ pair<int, Graph> DistanceAlgo::FloydWarshall(int fd, Graph g) {
         }
     }
 
-    // print the graph matrix
-    cout << "The graph before Floyd Warshall: " << endl;
-    for (int i = 0; i < g.vertexNum(); i++) {
-        for (int j = 0; j < g.vertexNum(); j++) {
-            cout << g.at(i, j) << " ";
-        }
-        cout << endl;
-    }
     sleep(sleep_time);
 
     for (int k = 0; k < g.vertexNum(); k++) {
@@ -162,14 +154,6 @@ pair<int, Graph> DistanceAlgo::FloydWarshall(int fd, Graph g) {
     }
     // send the fd the result
     Util::outputHandler("\nFinished Floyd Warshall\n", fd);
-
-    cout << "The graph after Floyd Warshall: " << endl;
-    for (int i = 0; i < g.vertexNum(); i++) {
-        for (int j = 0; j < g.vertexNum(); j++) {
-            cout << g.at(i, j) << " ";
-        }
-        cout << endl;
-    }
 
     return make_pair(fd, g);
 }
@@ -218,13 +202,6 @@ pair<int, Graph> GraphAlgo::shortestDistance(int fd, Graph graph) {
 }
 
 pair<int, Graph> GraphAlgo::averageDistance(int fd, Graph graph) {
-    // // print the graph matrix
-    // for(int i=0;i<graph.vertexNum();i++){
-    //     for(int j=0;j<graph.vertexNum();j++){
-    //         cout<<graph.at(i,j)<<" ";
-    //     }
-    //     cout<<endl;
-    // }
 
     sleep(sleep_time);
     double totalDistance = 0;  // Total sum of distances
