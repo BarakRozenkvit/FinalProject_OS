@@ -31,13 +31,18 @@ bool ClientHandler::handleGraph(int fd) {
         string number = ClientHandler::inputHandler("Choose graph size\nYour Input: ", fd);
         try {
             int size = stoi(number);
-            // graph->newGraph(size);
+            if (size < 0) {
+                throw invalid_argument("Negative number not allowed!\n");  // Throw correct exception
+            }
             pthread_mutex_lock(&Graph::graph_mutex);
             Graph::users_graphs[fd].newGraph(size);
             pthread_mutex_unlock(&Graph::graph_mutex);
 
         } catch (const std::invalid_argument& e) {
-            ClientHandler::outputHandler("Number not provided!", fd);
+            ClientHandler::outputHandler(e.what(), fd);  // Output the correct exception message
+            sleep(1);
+        } catch (const std::out_of_range& e) {
+            ClientHandler::outputHandler("Number must be lower than int!", fd);  // Handle out of range exception
             sleep(1);
         }
         return false;
@@ -233,12 +238,11 @@ void ClientHandler::outputHandler(string message, int fd) {
 }
 
 void* ClientHandler::monitorHandlers(void*) {
-    pthread_mutex_lock(&isRunningMutex);    
+    pthread_mutex_lock(&isRunningMutex);
     bool run = _isRunning;
     pthread_mutex_unlock(&isRunningMutex);
-    
-    while (run) {
 
+    while (run) {
         pthread_mutex_lock(&mutexHandler);
         pthread_cond_wait(&condHandler, &mutexHandler);
         for (auto it = handlers.begin(); it != handlers.end();) {
@@ -256,7 +260,7 @@ void* ClientHandler::monitorHandlers(void*) {
             }
         }
         pthread_mutex_unlock(&mutexHandler);
-        pthread_mutex_lock(&isRunningMutex);    
+        pthread_mutex_lock(&isRunningMutex);
         run = _isRunning;
         pthread_mutex_unlock(&isRunningMutex);
     }
