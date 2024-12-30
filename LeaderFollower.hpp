@@ -103,6 +103,8 @@
  * LeaderFollower class implements a thread pool pattern for MST calculations
  * Each thread can process MST tasks from a shared queue
  */
+using namespace std;
+
 class LeaderFollower {
    private:
     std::queue<std::pair<int, Graph>> _tasks;  // Queue holds pairs of (client_fd, graph)

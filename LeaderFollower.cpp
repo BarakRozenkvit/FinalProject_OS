@@ -188,7 +188,7 @@ void LeaderFollower::start() {
         _threads.push_back(thread);
     }
     _leaderThread = _threads[0];
-    std::cout << "[LeaderFollower] Initial leader thread: " << _leaderThread << std::endl;
+    // std::cout << "[LeaderFollower] Initial leader thread: " << _leaderThread << std::endl;
 }
 
 // Stop the thread pool
