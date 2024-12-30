@@ -1,36 +1,34 @@
 #include "ActiveObject.hpp"
 #include <unistd.h>
 
+pthread_mutex_t ActiveObject::isRunningMutex=PTHREAD_MUTEX_INITIALIZER;
+bool ActiveObject::isRunning = true;
+
 ActiveObject::ActiveObject(pair<int,Graph> (*process)(int,Graph),ActiveObject* next){
     _tasks = queue<pair<int,Graph>>();
     _cond = PTHREAD_COND_INITIALIZER;
     _mutex = PTHREAD_MUTEX_INITIALIZER;
     _process = process;
     _next = next;
-    _isRunning = true;
 }
 
-ActiveObject::~ActiveObject(){
-    pthread_mutex_lock(&_mutex);
-    _isRunning = false;
-    pthread_cond_signal(&_cond);
-    pthread_mutex_unlock(&_mutex);
-}
+ActiveObject::~ActiveObject(){}
 
 void ActiveObject::run() {
-    while (_isRunning) {
+    
+    while (true) {
+
         pthread_mutex_lock(&_mutex);
-
-        // Wait for tasks to be available or stop signal
-        while (_tasks.empty() && _isRunning) {
+        while (_tasks.empty()) {
             pthread_cond_wait(&_cond, &_mutex); // Automatically releases the mutex while waiting
+            pthread_mutex_lock(&isRunningMutex);
+            bool run = isRunning;
+            pthread_mutex_unlock(&isRunningMutex);
+            if (!run){
+                pthread_mutex_unlock(&_mutex);
+                return;
+            }
         }
-
-        if (!_isRunning) {
-            pthread_mutex_unlock(&_mutex); // Ensure mutex is unlocked before exiting
-            return;
-        }
-
         // Get new task and pop from the queue
         auto task = _tasks.front();
         _tasks.pop();
@@ -63,4 +61,10 @@ void ActiveObject::pushTask(pair<int,Graph> task){
 
 ActiveObject*  ActiveObject::getNext(){
     return _next;
+}
+
+void ActiveObject::signalStop(){
+    pthread_mutex_lock(&_mutex);
+    pthread_cond_signal(&_cond);
+    pthread_mutex_unlock(&_mutex);
 }

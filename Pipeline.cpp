@@ -19,13 +19,27 @@ Pipeline::Pipeline(pair<int,Graph> (*mstAlgo) (int,Graph)){
 }
 
 Pipeline::~Pipeline(){
+    pthread_mutex_lock(&ActiveObject::isRunningMutex);
+    ActiveObject::isRunning = false;
+    pthread_mutex_unlock(&ActiveObject::isRunningMutex);
     ActiveObject* current = _stage;
     while(current!=nullptr){
         ActiveObject* temp = current;
+        current->signalStop();
         current = current->getNext();
+    }
+    
+    pthread_mutex_lock(&mutexWorker);
+    for (pthread_t id : workers){
+        pthread_join(id,nullptr);
+    }
+    pthread_mutex_unlock(&mutexWorker);
+    ActiveObject* current2 = _stage;
+    while(current2!=nullptr){
+        ActiveObject* temp = current2;
+        current2 = current2->getNext();
         delete temp; 
     }
-    stop();    
 }
 
 

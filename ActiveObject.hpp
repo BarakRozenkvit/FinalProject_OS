@@ -20,7 +20,6 @@ class ActiveObject{
     // next active object to push tasks
     ActiveObject* _next;
     // 
-    bool _isRunning;
 
 public:
     // Active object gets a function that he runs and the next active object
@@ -33,4 +32,8 @@ public:
     void pushTask(pair<int,Graph> task);
     // get next object
     ActiveObject* getNext();
+
+    void signalStop();
+    static pthread_mutex_t isRunningMutex;
+    static bool isRunning;
 };
