@@ -1,13 +1,8 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include <condition_variable>
-#include <mutex>
-#include <thread>
 #include <iostream>
-#include <filesystem>
 #include <string>
 #include <unistd.h>
 #include <iostream>
@@ -68,7 +63,7 @@ void signalHandler(int signal) {
 
         ClientHandler::killHandlers();
         Pipeline::destroyAll();
-        LeaderFollower::destroyAll();
+        LeaderFollowerFactory::destroyAll();
         stopReactor(reactor);
         exit(0);
     }
