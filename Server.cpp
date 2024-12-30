@@ -60,11 +60,11 @@ int get_listener_socket()
 
 void signalHandler(int signal) {
     if (signal == SIGINT) {
-
         ClientHandler::killHandlers();
         Pipeline::destroyAll();
         LeaderFollowerFactory::destroyAll();
         stopReactor(reactor);
+        // std::cout << "[Server] Gracefully shutting down." << std::endl;
         exit(0);
     }
 }
@@ -82,7 +82,7 @@ int main()
         exit(1);
     }
 
-    ClientHandler::startMonitorHandlers();
+    // ClientHandler::startMonitorHandlers();
 
     reactor = startReactor();
     addFdToReactor(reactor, listener, ClientHandler::handleConnection);

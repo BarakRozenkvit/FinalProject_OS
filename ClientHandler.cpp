@@ -37,7 +37,6 @@ bool ClientHandler::handleGraph(int fd) {
             pthread_mutex_lock(&Graph::graph_mutex);
             Graph::users_graphs[fd].newGraph(size);
             pthread_mutex_unlock(&Graph::graph_mutex);
-
         } catch (const std::invalid_argument& e) {
             ClientHandler::outputHandler(e.what(), fd);  // Output the correct exception message
             sleep(1);
@@ -45,6 +44,7 @@ bool ClientHandler::handleGraph(int fd) {
             ClientHandler::outputHandler("Number must be lower than int!", fd);  // Handle out of range exception
             sleep(1);
         }
+        
         return false;
     }
 
@@ -183,12 +183,14 @@ string ClientHandler::inputHandler(string message, int fd) {
     size_t receiveBytes = recv(fd, buffer, sizeof(buffer), 0);
     if (receiveBytes == 0) {
         pthread_mutex_lock(&Graph::graph_mutex);
+        Graph::users_graphs[fd].clear();
         Graph::users_graphs.erase(fd);
         pthread_mutex_unlock(&Graph::graph_mutex);
         return "Exit";
     }
     if (receiveBytes < 0) {
         pthread_mutex_lock(&Graph::graph_mutex);
+        Graph::users_graphs[fd].clear();
         Graph::users_graphs.erase(fd);
         pthread_mutex_unlock(&Graph::graph_mutex);
         perror("recv");
@@ -199,6 +201,8 @@ string ClientHandler::inputHandler(string message, int fd) {
     string input(buffer);
     if (input == "Exit") {
         pthread_mutex_lock(&Graph::graph_mutex);
+        // Graph::users_graphs.erase(fd);
+        Graph::users_graphs[fd].clear();
         Graph::users_graphs.erase(fd);
         pthread_mutex_unlock(&Graph::graph_mutex);
     }
@@ -209,22 +213,22 @@ string ClientHandler::inputHandler(string message, int fd) {
 void* ClientHandler::handleClient(int fd) {
     bool exit = false;
 
-    // Lock the mutex before reading _isRunning
-    pthread_mutex_lock(&isRunningMutex);
-    while (_isRunning && !exit) {
+    while (true) {
+        pthread_mutex_lock(&isRunningMutex);
+        bool run = _isRunning;
         pthread_mutex_unlock(&isRunningMutex);  // Unlock before calling handleGraph
         exit = ClientHandler::handleGraph(fd);
-
-        // Lock the mutex again before checking _isRunning
-        pthread_mutex_lock(&isRunningMutex);
+        if (!run || exit){
+            return nullptr;
+        }       
     }
-    pthread_mutex_unlock(&isRunningMutex);  // Unlock after exiting the loop
+    // pthread_mutex_unlock(&isRunningMutex);  // Unlock after exiting the loop
 
-    if (exit && _isRunning) {
-        pthread_mutex_lock(&mutexHandler);
-        pthread_cond_signal(&condHandler);
-        pthread_mutex_unlock(&mutexHandler);
-    }
+    // if (exit && _isRunning) {
+    //     pthread_mutex_lock(&mutexHandler);
+    //     pthread_cond_signal(&condHandler);
+    //     pthread_mutex_unlock(&mutexHandler);
+    // }
     return nullptr;
 }
 
@@ -237,54 +241,60 @@ void ClientHandler::outputHandler(string message, int fd) {
     }
 }
 
-void* ClientHandler::monitorHandlers(void*) {
-    pthread_mutex_lock(&isRunningMutex);
-    bool run = _isRunning;
-    pthread_mutex_unlock(&isRunningMutex);
+// void* ClientHandler::monitorHandlers(void*) {
+//     pthread_mutex_lock(&isRunningMutex);
+//     bool run = _isRunning;
+//     pthread_mutex_unlock(&isRunningMutex);
 
-    while (run) {
-        pthread_mutex_lock(&mutexHandler);
-        pthread_cond_wait(&condHandler, &mutexHandler);
-        for (auto it = handlers.begin(); it != handlers.end();) {
-            proactorArgsClient* data = static_cast<proactorArgsClient*>((*it).second);
+//     while (run) {
+//         pthread_mutex_lock(&mutexHandler);
+//         pthread_cond_wait(&condHandler, &mutexHandler);
+//         for (auto it = handlers.begin(); it != handlers.end();) {
+//             proactorArgsClient* data = static_cast<proactorArgsClient*>((*it).second);
 
-            pthread_mutex_lock(&pauseMutex);  // Lock to safely access `pause`
-            bool isPaused = data->pause;
-            pthread_mutex_unlock(&pauseMutex);  // Unlock after accessing `pause`
+//             pthread_mutex_lock(&pauseMutex);  // Lock to safely access `pause`
+//             bool isPaused = data->pause;
+//             pthread_mutex_unlock(&pauseMutex);  // Unlock after accessing `pause`
 
-            if (isPaused) {
-                stopProactorClient((*it).first, data);
-                handlers.erase(it);
-            } else {
-                ++it;
-            }
-        }
-        pthread_mutex_unlock(&mutexHandler);
-        pthread_mutex_lock(&isRunningMutex);
-        run = _isRunning;
-        pthread_mutex_unlock(&isRunningMutex);
-    }
-    return nullptr;
-}
+//             if (isPaused) {
+//                 stopProactorClient((*it).first, data);
+//                 handlers.erase(it);
+//             } else {
+//                 ++it;
+//             }
+//         }
+//         pthread_mutex_unlock(&mutexHandler);
+//         pthread_mutex_lock(&isRunningMutex);
+//         run = _isRunning;
+//         pthread_mutex_unlock(&isRunningMutex);
+//     }
+//     return nullptr;
+// }
 
-void ClientHandler::startMonitorHandlers() {
-    // start thread for monitor handlers and add to handlers
-    int ret = pthread_create(&_monitor, nullptr, ClientHandler::monitorHandlers, nullptr);
-    if (ret != 0) {
-        perror("pthread_create");
-    }
-}
+// void ClientHandler::startMonitorHandlers() {
+//     // start thread for monitor handlers and add to handlers
+//     int ret = pthread_create(&_monitor, nullptr, ClientHandler::monitorHandlers, nullptr);
+//     if (ret != 0) {
+//         perror("pthread_create");
+//     }
+// }
 
 void ClientHandler::killHandlers() {
+    // cout << "Starting to kill handlers" << endl;
     pthread_mutex_lock(&isRunningMutex);
     _isRunning = false;  // Safely set _isRunning to false
+    // cout << "set isRunning to false" << endl;
     pthread_mutex_unlock(&isRunningMutex);
 
     pthread_mutex_lock(&mutexHandler);
+    // cout << "locked mutexHandler" << endl;
     for (auto id : handlers) {
         proactorArgsClient* data = static_cast<proactorArgsClient*>(id.second);
         stopProactorClient(id.first, data);
+        // cout << "Killing handler: " << id.first << endl;
     }
     pthread_cond_signal(&condHandler);  // Signal only once
+    // cout << "Signaled condHandler" << endl;
     pthread_mutex_unlock(&mutexHandler);
+    // cout << "finished killing handlers" << endl;
 }

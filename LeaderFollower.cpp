@@ -200,7 +200,9 @@ void LeaderFollower::stop() {
     pthread_mutex_unlock(&_taskMutex);
 
     for (pthread_t thread : _threads) {
-        pthread_join(thread, nullptr);
+        if(pthread_join(thread, nullptr)!=0){
+            std::cerr << "Failed to join thread" << std::endl;
+        }
     }
     _threads.clear();
     _isStarted = false;

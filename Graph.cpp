@@ -75,3 +75,8 @@ bool Graph::isConnected() const {
     }
     return true;
 }
+
+void Graph::clear() {
+    _graph.clear();
+    _edgeCounter = 0;
+}

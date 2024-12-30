@@ -16,7 +16,7 @@ class Graph{
 
 public:
 
-static pthread_mutex_t graph_mutex;
+    static pthread_mutex_t graph_mutex;
 
     /*
      * Map of users and their graphs
@@ -59,6 +59,8 @@ static pthread_mutex_t graph_mutex;
     
 
     bool isConnected() const;
+
+    void clear();
 
 private:
     void DFS(int v, vector<bool>& visited) const;
