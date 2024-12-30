@@ -54,16 +54,6 @@ namespace ClientHandler{
     void* handleConnection(int fd);
 
     /*
-    * function to monitor all the handlers threads and if one is down, kill it so it wont be zombie and free data
-    */
-    void* monitorHandlers(void*);
-
-    /*
-    * function to start thread of monitor handlers
-    */
-    void startMonitorHandlers();
-
-    /*
     * function to kill all threads in threads list and free args
     */
     void killHandlers();

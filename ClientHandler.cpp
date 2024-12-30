@@ -201,7 +201,6 @@ string ClientHandler::inputHandler(string message, int fd) {
     string input(buffer);
     if (input == "Exit") {
         pthread_mutex_lock(&Graph::graph_mutex);
-        // Graph::users_graphs.erase(fd);
         Graph::users_graphs[fd].clear();
         Graph::users_graphs.erase(fd);
         pthread_mutex_unlock(&Graph::graph_mutex);
@@ -222,13 +221,7 @@ void* ClientHandler::handleClient(int fd) {
             return nullptr;
         }       
     }
-    // pthread_mutex_unlock(&isRunningMutex);  // Unlock after exiting the loop
 
-    // if (exit && _isRunning) {
-    //     pthread_mutex_lock(&mutexHandler);
-    //     pthread_cond_signal(&condHandler);
-    //     pthread_mutex_unlock(&mutexHandler);
-    // }
     return nullptr;
 }
 
@@ -241,53 +234,15 @@ void ClientHandler::outputHandler(string message, int fd) {
     }
 }
 
-// void* ClientHandler::monitorHandlers(void*) {
-//     pthread_mutex_lock(&isRunningMutex);
-//     bool run = _isRunning;
-//     pthread_mutex_unlock(&isRunningMutex);
-
-//     while (run) {
-//         pthread_mutex_lock(&mutexHandler);
-//         pthread_cond_wait(&condHandler, &mutexHandler);
-//         for (auto it = handlers.begin(); it != handlers.end();) {
-//             proactorArgsClient* data = static_cast<proactorArgsClient*>((*it).second);
-
-//             pthread_mutex_lock(&pauseMutex);  // Lock to safely access `pause`
-//             bool isPaused = data->pause;
-//             pthread_mutex_unlock(&pauseMutex);  // Unlock after accessing `pause`
-
-//             if (isPaused) {
-//                 stopProactorClient((*it).first, data);
-//                 handlers.erase(it);
-//             } else {
-//                 ++it;
-//             }
-//         }
-//         pthread_mutex_unlock(&mutexHandler);
-//         pthread_mutex_lock(&isRunningMutex);
-//         run = _isRunning;
-//         pthread_mutex_unlock(&isRunningMutex);
-//     }
-//     return nullptr;
-// }
-
-// void ClientHandler::startMonitorHandlers() {
-//     // start thread for monitor handlers and add to handlers
-//     int ret = pthread_create(&_monitor, nullptr, ClientHandler::monitorHandlers, nullptr);
-//     if (ret != 0) {
-//         perror("pthread_create");
-//     }
-// }
 
 void ClientHandler::killHandlers() {
     // cout << "Starting to kill handlers" << endl;
     pthread_mutex_lock(&isRunningMutex);
     _isRunning = false;  // Safely set _isRunning to false
-    // cout << "set isRunning to false" << endl;
+
     pthread_mutex_unlock(&isRunningMutex);
 
     pthread_mutex_lock(&mutexHandler);
-    // cout << "locked mutexHandler" << endl;
     for (auto id : handlers) {
         proactorArgsClient* data = static_cast<proactorArgsClient*>(id.second);
         stopProactorClient(id.first, data);
