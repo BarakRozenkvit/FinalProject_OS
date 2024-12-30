@@ -189,7 +189,7 @@ class LeaderFollowerFactory {
             if (instance) {
                 instance->stop();                               // Stop the thread pool
                 Singletone<LeaderFollower>::destroyInstance();  // Destroy singleton instance
-                std::cout << "[LeaderFollowerFactory] LeaderFollower instance destroyed for algorithm: " << algo << std::endl;
+                // std::cout << "[LeaderFollowerFactory] LeaderFollower instance destroyed for algorithm: " << algo << std::endl;
             }
         }
         _instances.clear();
