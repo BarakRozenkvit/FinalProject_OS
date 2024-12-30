@@ -124,7 +124,7 @@ class LeaderFollower {
    public:
     // Constructor initializes thread pool with specified algorithm and thread count
     LeaderFollower(pair<int, Graph> (*mstAlgo)(int, Graph), int threadCount = 5, int queueLimit = 10);
-    ~LeaderFollower();
+    virtual ~LeaderFollower();
 
     // Start the thread pool
     void start();
@@ -141,12 +141,14 @@ class LeaderFollowerPrim : public LeaderFollower {
    public:
     LeaderFollowerPrim(int threadCount = 5, int queueLimit = 10)
         : LeaderFollower(MSTAlgo::Prim, threadCount, queueLimit) {}
+    ~LeaderFollowerPrim() override {}
 };
 
 class LeaderFollowerKruskal : public LeaderFollower {
    public:
     LeaderFollowerKruskal(int threadCount = 5, int queueLimit = 10)
         : LeaderFollower(MSTAlgo::Kruskal, threadCount, queueLimit) {}
+    ~LeaderFollowerKruskal() override {}
 };
 
 /**
@@ -187,9 +189,7 @@ class LeaderFollowerFactory {
     static void destroyAll() {
         for (auto& [algo, instance] : _instances) {
             if (instance) {
-                instance->stop();                               // Stop the thread pool
-                Singletone<LeaderFollower>::destroyInstance();  // Destroy singleton instance
-                // std::cout << "[LeaderFollowerFactory] LeaderFollower instance destroyed for algorithm: " << algo << std::endl;
+                delete instance;
             }
         }
         _instances.clear();
