@@ -85,10 +85,13 @@ void* LeaderFollower::workerThread(void* arg) {
 
         // Leader transition logic
         if (lf->_leaderThread == pthread_self()) {
+
+            // find the current thread in the threads vector
             auto it = std::find_if(
                 lf->_threads.begin(),
                 lf->_threads.end(),
-                [](pthread_t t) { return pthread_equal(t, pthread_self()); });
+                [](pthread_t t) { //
+                    return pthread_equal(t, pthread_self());});
 
             if (it != lf->_threads.end() && std::next(it) != lf->_threads.end()) {
                 lf->_leaderThread = *std::next(it);
@@ -104,7 +107,9 @@ void* LeaderFollower::workerThread(void* arg) {
         pthread_mutex_unlock(&lf->_taskMutex);
 
         try {
+            // Execute MST algorithm.
             auto result = lf->_mstAlgo(task.first, task.second);
+            // Perform additional functions...
             result = GraphAlgo::getTotalWeight(result.first, result.second);
             result = DistanceAlgo::FloydWarshall(result.first, result.second);
             result = GraphAlgo::averageDistance(result.first, result.second);
