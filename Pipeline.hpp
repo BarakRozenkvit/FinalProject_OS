@@ -10,7 +10,7 @@ using namespace std;
 
 class Pipeline{
     // list to hold all pipeline threads id and args
-    std::vector<pthread_t> workers; // Declaration
+    std::vector<pthread_t> workers; 
     // cond if worker is finished
     pthread_cond_t condWorker;
     // mutex to add worker to list

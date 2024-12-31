@@ -64,7 +64,6 @@ void signalHandler(int signal) {
         Pipeline::destroyAll();
         LeaderFollowerFactory::destroyAll();
         stopReactor(reactor);
-        // std::cout << "[Server] Gracefully shutting down." << std::endl;
         exit(0);
     }
 }
@@ -72,7 +71,6 @@ void signalHandler(int signal) {
 
 int main()
 {
-
     signal(SIGINT, signalHandler);
     
     int listener = get_listener_socket();
@@ -81,8 +79,6 @@ int main()
         perror("socket");
         exit(1);
     }
-
-    // ClientHandler::startMonitorHandlers();
 
     reactor = startReactor();
     addFdToReactor(reactor, listener, ClientHandler::handleConnection);

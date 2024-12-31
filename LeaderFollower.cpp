@@ -37,7 +37,6 @@ void LeaderFollower::start() {
         _threads.push_back(thread);
     }
     _leaderThread = _threads[0];
-    // std::cout << "[LeaderFollower] Initial leader thread: " << _leaderThread << std::endl;
 }
 
 // Stop the thread pool
@@ -96,7 +95,6 @@ void* LeaderFollower::workerThread(void* arg) {
             } else {
                 lf->_leaderThread = lf->_threads[0];
             }
-            // cout << "[LeaderFollower] New leader thread: " << lf->_leaderThread << endl;
             pthread_cond_signal(&lf->_leaderCond);
         }
 
@@ -113,9 +111,8 @@ void* LeaderFollower::workerThread(void* arg) {
             result = GraphAlgo::longestDistance(result.first, result.second);
             result = GraphAlgo::shortestDistance(result.first, result.second);
 
-            // std::cout << "[LeaderFollower] Task completed for client " << task.first << std::endl;
         } catch (const std::exception& e) {
-            // std::cerr << "[LeaderFollower] Exception while processing task: " << e.what() << std::endl;
+            std::cerr << "Exception in task processing: " << e.what() << std::endl;
         }
     }
     return nullptr;

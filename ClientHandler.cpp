@@ -32,16 +32,16 @@ bool ClientHandler::handleGraph(int fd) {
         try {
             int size = stoi(number);
             if (size < 0) {
-                throw invalid_argument("Negative number not allowed!\n");  // Throw correct exception
+                throw invalid_argument("Negative number not allowed!\n");  
             }
             pthread_mutex_lock(&Graph::graph_mutex);
             Graph::users_graphs[fd].newGraph(size);
             pthread_mutex_unlock(&Graph::graph_mutex);
         } catch (const std::invalid_argument& e) {
-            ClientHandler::outputHandler(e.what(), fd);  // Output the correct exception message
+            ClientHandler::outputHandler(e.what(), fd);  
             sleep(1);
         } catch (const std::out_of_range& e) {
-            ClientHandler::outputHandler("Number must be lower than int!", fd);  // Handle out of range exception
+            ClientHandler::outputHandler("Number must be lower than int!", fd);  
             sleep(1);
         }
         
@@ -84,7 +84,6 @@ bool ClientHandler::handleGraph(int fd) {
             }
             sleep(1);
 
-            // ClientHandler::inputHandler("Press Any Key to Continue...\n", fd);
             pthread_mutex_unlock(&Graph::graph_mutex);
             return false;
 

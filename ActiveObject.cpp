@@ -14,8 +14,8 @@ ActiveObject::ActiveObject(pair<int,Graph> (*process)(int,Graph),ActiveObject* n
 
 ActiveObject::~ActiveObject(){}
 
+
 void ActiveObject::run() {
-    
     while (true) {
 
         pthread_mutex_lock(&_mutex);
