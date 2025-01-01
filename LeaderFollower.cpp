@@ -73,7 +73,7 @@ void* LeaderFollower::workerThread(void* arg) {
     while (true) {
         pthread_mutex_lock(&lf->_taskMutex);
 
-        // Wait for a task
+        // if there are no tasks, wait for a signal
         while (lf->_isRunning && lf->_tasks.empty()) {
             pthread_cond_wait(&lf->_taskCond, &lf->_taskMutex);
         }
