@@ -66,7 +66,6 @@ bool ClientHandler::handleGraph(int fd) {
         pthread_mutex_lock(&Graph::graph_mutex);
         ClientHandler::outputHandler("Results:\n", fd);
         try {
-            //  if (!graph->vertexNum()) {
             if (!Graph::users_graphs[fd].vertexNum()) {
                 throw invalid_argument("Cant Calculate on Empty Graph!\n");
             }
@@ -79,6 +78,7 @@ bool ClientHandler::handleGraph(int fd) {
                 // Pipeline implementation
                 FactoryPipeline::get(algo)->addTask(fd, Graph::users_graphs[fd]);
             } else {  // LF - Leader-Follower
+                // creats LeaderFollower instance through factory, and add requested task.
                 LeaderFollower* lf = LeaderFollowerFactory::get(algo);
                 lf->addTask(fd, Graph::users_graphs[fd]);
             }

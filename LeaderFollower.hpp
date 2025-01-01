@@ -82,6 +82,7 @@ class LeaderFollowerFactory {
         if (_instances.find(algo) == _instances.end()) {
             if (algo == "Prim") {
                 auto* instance = Singletone<LeaderFollowerPrim>::getInstance();
+                // ini
                 instance->start();  // Start thread pool once
                 _instances[algo] = instance;
             } else if (algo == "Kruskal") {

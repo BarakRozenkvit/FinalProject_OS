@@ -35,6 +35,8 @@ void LeaderFollower::start() {
     // would help manage the leader switching logic.
     for (int i = 0; i < _threadCount; ++i) {
         pthread_t thread;
+        // Creates _threadCount threads that will execute the workerThread function
+        // and pass the current LeaderFollower instance as an argument.
         pthread_create(&thread, nullptr, workerThread, this);
         _threads.push_back(thread);
     }
@@ -58,18 +60,9 @@ void LeaderFollower::stop() {
     _isStarted = false;
 }
 
-// Add a task to the queue
-void LeaderFollower::addTask(int fd, Graph graph) {
-    pthread_mutex_lock(&_taskMutex);
-    while (_tasks.size() >= _queueLimit) {
-        pthread_cond_wait(&_queueCond, &_taskMutex);  // Wait for space
-    }
-    _tasks.push({fd, graph});
-    pthread_cond_signal(&_taskCond);  // Signal a thread to process the task
-    pthread_mutex_unlock(&_taskMutex);
-}
 
-// Worker thread function: Handles task execution and leader transitions.
+// Worker thread function that each thread executes.
+// Handles task execution and leader transitions.
 void* LeaderFollower::workerThread(void* arg) {
     LeaderFollower* lf = static_cast<LeaderFollower*>(arg);
 
@@ -131,4 +124,17 @@ void* LeaderFollower::workerThread(void* arg) {
         }
     }
     return nullptr;
+}
+
+// Add a task to the queue
+void LeaderFollower::addTask(int fd, Graph graph) {
+    pthread_mutex_lock(&_taskMutex);
+
+    while (_tasks.size() >= _queueLimit) { // in case of full queue
+        pthread_cond_wait(&_queueCond, &_taskMutex);  // Wait for space
+    }
+
+    _tasks.push({fd, graph});   // Add task to the queue
+    pthread_cond_signal(&_taskCond);  // Signal a thread to process the task
+    pthread_mutex_unlock(&_taskMutex);
 }
