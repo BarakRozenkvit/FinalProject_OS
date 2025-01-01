@@ -1,5 +1,7 @@
 #include "LeaderFollower.hpp"
+
 #include <unistd.h>
+
 #include <iostream>
 
 // Constructor
@@ -18,7 +20,7 @@ LeaderFollower::LeaderFollower(pair<int, Graph> (*mstAlgo)(int, Graph), int thre
 
 // Destructor: Cleans up resources by stopping the thread pool and destroying synchronization primitives.
 LeaderFollower::~LeaderFollower() {
-    stop(); // Ensure all threads are stopped
+    stop();  // Ensure all threads are stopped
     pthread_mutex_destroy(&_taskMutex);
     pthread_cond_destroy(&_taskCond);
     pthread_cond_destroy(&_queueCond);
@@ -40,7 +42,7 @@ void LeaderFollower::start() {
         pthread_create(&thread, nullptr, workerThread, this);
         _threads.push_back(thread);
     }
-    _leaderThread = _threads[0]; // Set the first thread as the leader
+    _leaderThread = _threads[0];  // Set the first thread as the leader
 }
 
 // Stop the thread pool and join all threads.
@@ -52,7 +54,7 @@ void LeaderFollower::stop() {
     pthread_mutex_unlock(&_taskMutex);
 
     for (pthread_t thread : _threads) {
-        if(pthread_join(thread, nullptr)!=0){
+        if (pthread_join(thread, nullptr) != 0) {
             std::cerr << "Failed to join thread" << std::endl;
         }
     }
@@ -60,14 +62,10 @@ void LeaderFollower::stop() {
     _isStarted = false;
 }
 
-
 // Worker thread function that each thread executes.
 // Handles task execution and leader transitions.
-/*
-
-@param arg: Pointer to the LeaderFollower instance
-*/
 void* LeaderFollower::workerThread(void* arg) {
+    // cast the argument to LeaderFollower instance
     LeaderFollower* lf = static_cast<LeaderFollower*>(arg);
 
     while (true) {
@@ -86,20 +84,20 @@ void* LeaderFollower::workerThread(void* arg) {
 
         // Leader transition logic: The leader assigns a new leader before processing its task
         if (lf->_leaderThread == pthread_self()) {
-
-            // Find the current thread in the list 
+            // Find the current thread in the list
             // and set the next thread as the leader
             auto it = std::find_if(
                 lf->_threads.begin(),
                 lf->_threads.end(),
-                [](pthread_t t) { //
-                    return pthread_equal(t, pthread_self());});
+                [](pthread_t t) {  //
+                    return pthread_equal(t, pthread_self());
+                });
 
             if (it != lf->_threads.end() && std::next(it) != lf->_threads.end()) {
                 // Set the next thread as the new leader
                 lf->_leaderThread = *std::next(it);
             } else {
-                // If the current thread is the last thread, 
+                // If the current thread is the last thread,
                 // start over and set the first thread as the new leader.
                 lf->_leaderThread = lf->_threads[0];
             }
@@ -134,11 +132,11 @@ void* LeaderFollower::workerThread(void* arg) {
 void LeaderFollower::addTask(int fd, Graph graph) {
     pthread_mutex_lock(&_taskMutex);
 
-    while (_tasks.size() >= _queueLimit) { // in case of full queue
+    while (_tasks.size() >= _queueLimit) {            // in case of full queue
         pthread_cond_wait(&_queueCond, &_taskMutex);  // Wait for space
     }
 
-    _tasks.push({fd, graph});   // Add task to the queue
+    _tasks.push({fd, graph});         // Add task to the queue
     pthread_cond_signal(&_taskCond);  // Signal a thread to process the task
     pthread_mutex_unlock(&_taskMutex);
 }
