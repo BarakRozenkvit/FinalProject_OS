@@ -63,6 +63,10 @@ void LeaderFollower::stop() {
 
 // Worker thread function that each thread executes.
 // Handles task execution and leader transitions.
+/*
+
+@param arg: Pointer to the LeaderFollower instance
+*/
 void* LeaderFollower::workerThread(void* arg) {
     LeaderFollower* lf = static_cast<LeaderFollower*>(arg);
 
@@ -109,7 +113,7 @@ void* LeaderFollower::workerThread(void* arg) {
         pthread_mutex_unlock(&lf->_taskMutex);
 
         try {
-            // Execute MST algorithm.
+            // Execute the relevant mstAlgo for each instance of LeaderFollower.
             auto result = lf->_mstAlgo(task.first, task.second);
             // Perform additional functions...
             result = GraphAlgo::getTotalWeight(result.first, result.second);
