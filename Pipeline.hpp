@@ -54,7 +54,6 @@ public:
     ~PipelineKruskal() override {};
 };
 
-// factory Pipeline
 class FactoryPipeline{
 public:
     // function that gets an instance of pipeline from algo string
