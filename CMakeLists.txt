@@ -20,7 +20,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Add the source files for the project
-add_executable(FinalProject_OS
+add_executable(main
     Graph.cpp
     Graph.hpp
     Server.cpp
