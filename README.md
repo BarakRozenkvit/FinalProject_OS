@@ -85,8 +85,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- Gal Ben Ami 
-- Rozenkvit
+- [Gal Ben Ami](https://github.com/benami171) 
+- [Barak Rozenkvit](https://github.com/barakrozenkvit) 
+
+Connect with us:
+- Gal: [![GitHub](https://img.shields.io/github/followers/benami171?label=follow&style=social)](https://github.com/benami171)
+- Barak: [![GitHub](https://img.shields.io/github/followers/barakrozenkvit?label=follow&style=social)](https://github.com/barakrozenkvit)
 
 ## 📚 References
 
